@@ -1,5 +1,3 @@
-scratch_preprocessing/datasets/
-pix2pixHD/datasets
 *.jpg
 *.jpeg
 *.png
@@ -9,4 +7,8 @@ pix2pixHD/datasets
 *.zip
 *.pth
 *.html
+*.sh
+*.gif
+*.xls
+file_name/
 #!datasets/scratch_segment_aug/
