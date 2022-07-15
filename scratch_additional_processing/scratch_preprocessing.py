@@ -1,4 +1,3 @@
-import os
 import pickle
 import random
 import gc
@@ -8,7 +7,6 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
-from pix2pixHD import train
 import os
 
 def load_image(info_dict_ns, image_size):
@@ -28,7 +26,7 @@ def load_image(info_dict_ns, image_size):
     return info_dict_ns
 
 
-def extract_scratch(info_dict, image_size):
+def extract_scratch(info_dict, image_size, scratch_segment, scratch_new_segment):
     """Take the scratch area only from the lid_scratch image
 
     :param info_dict: info_dict
@@ -37,7 +35,8 @@ def extract_scratch(info_dict, image_size):
 
     # match the pixel value of the lid_scratch with the idx_segment (segment numbers that represent scratch)
     info_dict['scratch']['npy'] = np.array(
-        [ii if ii in info_dict['scratch']['idx_segment'] else 0 for i in info_dict['lid_scratch']['npy'] for ii in
+        [ii + (scratch_new_segment[0] - scratch_segment[0]) if ii in info_dict['scratch']['idx_segment'] else 0 for i in
+         info_dict['lid_scratch']['npy'] for ii in
          i]).reshape(tuple(reversed(image_size))).squeeze()
 
     # 1. Dilate the scratch to connect slightly disconnected scratch, such as diagonally connected pixel
@@ -57,7 +56,7 @@ def extract_scratch(info_dict, image_size):
     return info_dict
 
 
-def augment_scratch(info_dict_sc, factor_shift, factor_rotate, image_size):
+def augment_scratch(info_dict_sc, factor_shift, factor_rotate, image_size, scratch_new_segments):
     """Augment scratch area.
     :param info_dict_sc: info_dict for scratch
     :param image_size: tuple with image size (width, height)
@@ -72,7 +71,11 @@ def augment_scratch(info_dict_sc, factor_shift, factor_rotate, image_size):
         flip = round(random.uniform(-1,1))
 
         # rotate and scale scratch based on rotate and scale
-        info_dict_sc[str(sc)+'_aug'] = imutils.rotate(info_dict_sc[str(sc)].astype(np.uint8), angle=rotate)
+        (h, w) = info_dict_sc[str(sc)].astype(np.uint8).shape[:2]
+        (cX, cY) = (w // 2, h // 2)
+        M = cv2.getRotationMatrix2D((cX, cY), rotate, 1.0)
+        info_dict_sc[str(sc) + '_aug'] = cv2.warpAffine(info_dict_sc[str(sc)].astype(np.uint8), M, (w, h),
+                                                        flags=cv2.INTER_NEAREST)
 
         # shift scratch based on shift horizontal and vertical
         info_dict_sc[str(sc)+'_aug'] = imutils.translate(info_dict_sc[str(sc)+'_aug'].astype(np.uint8), shift_horizontal,
@@ -81,10 +84,18 @@ def augment_scratch(info_dict_sc, factor_shift, factor_rotate, image_size):
         # flip scratch based on flip variable (negative for vertical & horizontal, 0 for vertical, positive for horizontal)
         info_dict_sc[str(sc) + '_aug'] = cv2.flip(info_dict_sc[str(sc)+'_aug'].astype(np.uint8), flip)
 
+
+        for ii in scratch_new_segments:
+            temp = np.clip(info_dict_sc[str(sc) + '_aug'] * (1 * (info_dict_sc[str(sc) + '_aug'] == ii)), 0, 1)
+            kernel = np.ones((5, 5), np.uint8)
+            temp = cv2.morphologyEx(temp.astype(np.uint8), cv2.MORPH_CLOSE, kernel)
+            temp = temp * ii
+            info_dict_sc[str(sc) + '_aug'] = np.maximum(temp, info_dict_sc[str(sc) + '_aug'])
+
     return info_dict_sc
 
 
-def add_scratch_to_lid(info_dict):
+def add_scratch_to_lid(info_dict, scratch_new_segments):
     """Add scratch image to the lid image.
 
     Steps:
@@ -99,14 +110,15 @@ def add_scratch_to_lid(info_dict):
     kernel = np.ones((10, 10), np.uint8)
     eroded_lid = cv2.erode(info_dict['lid_normal']['lid'].astype('uint8'), kernel, iterations=1)
 
-    info_dict['scratch']['image_aug_stack_n'] = info_dict['lid_normal']['lid']
+    info_dict['scratch']['image_aug_stack_n'] = info_dict['lid_normal']['npy']
     for sc in range(info_dict['scratch']['count']):
         if sc == 0: continue
 
         # remove scratch area that is close to the lid's edge
         temp = eroded_lid * info_dict['scratch'][str(sc)+'_aug']
-        if np.count_nonzero((temp==2)|(temp==3)) == 0 :
-            temp = temp*0
+        if np.count_nonzero(np.any([temp == i for i in scratch_new_segments])) == 0:
+        # if np.count_nonzero((temp==2)|(temp==3)) == 0 :
+        #     temp = temp*0
             continue
 
         # add augmented scratch to lid_scratch based on lid_normal
@@ -116,8 +128,8 @@ def add_scratch_to_lid(info_dict):
 
 
 def generate_scratch_segments(number_of_generated_images, input_normal_segment, input_scratch_segment,
-                              lid_normal_segment, lid_scratch_segment, scratch_segment, output_normal_random_image,
-                              image_size, factor_shift, factor_rotate,
+                              lid_normal_segment, lid_scratch_segment, scratch_segments, output_normal_random_image,
+                              image_size, factor_shift, factor_rotate, scratch_new_segments,
                               output_scratch_before_after, output_scratch_segment_image, output_scratch_segment_npy):
     print("STEP 1: GENERATING " + str(number_of_generated_images) + " NEW SCRATCH SEGMENTS")
     info_dict_list = []
@@ -133,7 +145,7 @@ def generate_scratch_segments(number_of_generated_images, input_normal_segment, 
 
         info_dict['lid_normal']['idx_segment'] = lid_normal_segment
         info_dict['lid_scratch']['idx_segment'] = lid_scratch_segment
-        info_dict['scratch']['idx_segment'] = scratch_segment
+        info_dict['scratch']['idx_segment'] = scratch_segments
 
         # randomly select and load images from the dataset
         for i in ['lid_normal', 'lid_scratch']:
@@ -143,20 +155,22 @@ def generate_scratch_segments(number_of_generated_images, input_normal_segment, 
         cv2.imwrite(os.path.join(output_normal_random_image, str(count_img) + '.jpg'), info_dict['lid_normal']['image'])
 
         # extract the scratch area
-        info_dict = extract_scratch(info_dict, image_size)
+        info_dict = extract_scratch(info_dict, image_size, scratch_segments, scratch_new_segments)
 
         # augment the scratch
-        info_dict['scratch'] = augment_scratch(info_dict['scratch'], factor_shift, factor_rotate, image_size)
+        info_dict['scratch'] = augment_scratch(info_dict['scratch'], factor_shift, factor_rotate, image_size, scratch_new_segments)
 
         # put augmented scratch on the lid
-        info_dict = add_scratch_to_lid(info_dict)
+        info_dict = add_scratch_to_lid(info_dict, scratch_new_segments)
 
-        if np.count_nonzero((info_dict['scratch']['image_aug_stack_n'] == 2) |
-                            (info_dict['scratch']['image_aug_stack_n'] == 3) |
-                            (info_dict['scratch']['image_aug_stack_n'] == 4)) == 0:
+        # if the new scratch image does not have any scratch, repeat the image generation
+        if np.count_nonzero(np.any([info_dict['scratch']['image_aug_stack_n'] == i for i in scratch_new_segments])) == 0:
+        # if np.count_nonzero((info_dict['scratch']['image_aug_stack_n'] == 2) |
+        #                     (info_dict['scratch']['image_aug_stack_n'] == 3) |
+        #                     (info_dict['scratch']['image_aug_stack_n'] == 4)) == 0:
             continue
 
-        norm = mpl.colors.Normalize(vmin=0, vmax=4)
+        norm = mpl.colors.Normalize(vmin=0, vmax=scratch_new_segments[-1]+1)
         cmap = cm.nipy_spectral # change the cmap here if you want to change the color. Options available at https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html
         m = cm.ScalarMappable(norm=norm, cmap=cmap)
         fig, ax = plt.subplots(2, 2, figsize=(30, 30))
@@ -180,80 +194,3 @@ def generate_scratch_segments(number_of_generated_images, input_normal_segment, 
     # with open(EXPORT_PATH + '/info_dict.pickle', 'wb') as f:
     #     pickle.dump(info_dict_list, f)
 
-
-def cut_basic_unit(output_scratch_segment_npy, output_scratch_basic_unit, image_size):
-    print('STEP 2: CUT INTO BASIC UNITS')
-    name_list = os.listdir(output_scratch_segment_npy)
-    if not os.path.isdir(output_scratch_basic_unit + '\\' + "straight\\test_A"):
-        os.mkdir(output_scratch_basic_unit + '\\straight\\test_A')
-        os.mkdir(output_scratch_basic_unit + '\\curve\\test_A')
-        os.mkdir(output_scratch_basic_unit + '\\end\\test_A')
-        os.mkdir(output_scratch_basic_unit + '\\all\\test_A')
-    for name in name_list:
-        npy_file = np.load(output_scratch_segment_npy + "\\" + name)
-        straight = np.zeros(shape=tuple(reversed(image_size)) + (3,))
-        curve = np.zeros(shape=tuple(reversed(image_size)) + (3,))
-        end = np.zeros(shape=tuple(reversed(image_size)) + (3,))
-        LID = np.zeros(shape=tuple(reversed(image_size)) + (3,))
-        for i in range(image_size[1]):
-            for j in range(image_size[0]):
-                if npy_file[i, j] == 2:
-                    straight[i, j] = [5, 4, 120]
-                    LID[i, j] = [128, 0, 0]
-                elif npy_file[i, j] == 3:
-                    curve[i, j] = [5, 4, 120]
-                    LID[i, j] = [0, 128, 128]
-                elif npy_file[i, j] == 4:
-                    end[i, j] = [5, 4, 120]
-                    LID[i, j] = [0, 128, 0]
-                elif npy_file[i, j] == 1:
-                    LID[i, j] = [0, 0, 128]
-        cv2.imwrite(output_scratch_basic_unit + "\\straight\\test_A\\" + name[:-4] + ".png", straight)
-        cv2.imwrite(output_scratch_basic_unit + "\\curve\\test_A\\" + name[:-4] + ".png", curve)
-        cv2.imwrite(output_scratch_basic_unit + "\\end\\test_A\\" + name[:-4] + ".png", end)
-        cv2.imwrite(output_scratch_basic_unit + "\\all\\test_A\\" + name[:-4] + ".png", LID)
-
-
-def combine_scratch(output_pix2pix_inference, output_scratch_segment_npy, image_size, output_scratch_combined):
-    print('STEP 5: COMBINE BASIC UNITS')
-    gen_list = os.listdir(os.path.join(output_pix2pix_inference, "curve/test_latest/images/"))
-
-    for num in range(len(gen_list)):
-        npy = np.load(os.path.join(output_scratch_segment_npy, gen_list[num][:-22] + ".npy"))
-        curve_img = cv2.imread(os.path.join(output_pix2pix_inference, "curve/test_latest/images/", gen_list[num]), cv2.IMREAD_COLOR)
-        straight_img = cv2.imread(os.path.join(output_pix2pix_inference, "straight/test_latest/images/", gen_list[num]), cv2.IMREAD_COLOR)
-        end_img = cv2.imread(os.path.join(output_pix2pix_inference, "end/test_latest/images/", gen_list[num]), cv2.IMREAD_COLOR)
-
-        result = np.zeros(shape=tuple(reversed(image_size)) + (3,))
-
-        for i in range(image_size[1]):
-            for j in range(image_size[0]):
-                if npy[i][j] == 2:
-                    result[i][j] = straight_img[i][j]
-                elif npy[i][j] == 3:
-                    result[i][j] = curve_img[i][j]
-                elif npy[i][j] == 4:
-                    result[i][j] = end_img[i][j]
-        # result = result / 255
-        cv2.imwrite(os.path.join(output_scratch_combined, str(gen_list[num][:-22]) + ".jpg"), result)
-
-
-def combine_LID(output_scratch_combined, output_scratch_segment_npy, output_normal_random_image, image_size, output_scratch_lid_combined):
-    print('STEP 6: COMBINE WITH LIDS')
-    name_list = os.listdir(output_scratch_combined)
-
-    for name in name_list:
-        npy = np.load(os.path.join(output_scratch_segment_npy, name[:-4] + ".npy"))
-        lid = cv2.imread(os.path.join(output_normal_random_image, name), cv2.IMREAD_COLOR)
-        gen = cv2.imread(os.path.join(output_scratch_combined, name), cv2.IMREAD_COLOR)
-        # bnd = np.load(os.path.join(BND_PATH, name[:-4] + ".npy"))
-
-        FIN = lid.copy()
-
-        for i in range(image_size[1]):
-            for j in range(image_size[0]):
-                if npy[i][j] > 1 and gen[i, j, 0] != 0:
-                    FIN[i][j] = gen[i][j]
-                # if bnd[i, j] == 1 and gen[i, j, 0] < 65:
-                #     FIN[i, j] = lid[i, j]
-        cv2.imwrite(os.path.join(output_scratch_lid_combined, name), FIN)

@@ -12,7 +12,7 @@ class BaseOptions():
         # experiment specifics
         self.parser.add_argument('--name', type=str, default='Straight', help='name of the experiment. It decides where to store samples and models')
         self.parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
-        self.parser.add_argument('--checkpoints_dir', type=str, default='data/5_checkpoint_training', help='models are saved here')
+        self.parser.add_argument('--checkpoints_dir', type=str, default='data/5_output_checkpoint_training', help='models are saved here')
         self.parser.add_argument('--model', type=str, default='pix2pixHD', help='which model to use')
         self.parser.add_argument('--norm', type=str, default='instance', help='instance normalization or batch normalization')        
         self.parser.add_argument('--use_dropout', action='store_true', help='use dropout for the generator')
@@ -81,19 +81,19 @@ class BaseOptions():
 
         args = vars(self.opt)
 
-        print('------------ Options -------------')
-        for k, v in sorted(args.items()):
-            print('%s: %s' % (str(k), str(v)))
-        print('-------------- End ----------------')
+        # print('------------ Options -------------') # TODO print options 1/2
+        # for k, v in sorted(args.items()):
+        #     print('%s: %s' % (str(k), str(v)))
+        # print('-------------- End ----------------')
 
         # save to the disk        
         expr_dir = os.path.join(self.opt.checkpoints_dir, self.opt.name)
         util.mkdirs(expr_dir)
-        if save and not self.opt.continue_train:
-            file_name = os.path.join(expr_dir, 'opt.txt')
-            with open(file_name, 'wt') as opt_file:
-                opt_file.write('------------ Options -------------\n')
-                for k, v in sorted(args.items()):
-                    opt_file.write('%s: %s\n' % (str(k), str(v)))
-                opt_file.write('-------------- End ----------------\n')
+        # if save and not self.opt.continue_train: # TODO print options 2/2
+        #     file_name = os.path.join(expr_dir, 'opt.txt')
+        #     with open(file_name, 'wt') as opt_file:
+                # opt_file.write('------------ Options -------------\n')
+                # for k, v in sorted(args.items()):
+                #     opt_file.write('%s: %s\n' % (str(k), str(v)))
+                # opt_file.write('-------------- End ----------------\n')
         return self.opt

@@ -36,7 +36,7 @@ def define_G(input_nc, output_nc, ngf, netG, n_downsample_global=3, n_blocks_glo
         netG = Encoder(input_nc, output_nc, ngf, n_downsample_global, norm_layer)
     else:
         raise('generator not implemented!')
-    print(netG)
+    # print(netG) #TODO print network 2/4
     if len(gpu_ids) > 0:
         assert(torch.cuda.is_available())   
         netG.cuda(gpu_ids[0])
@@ -46,7 +46,7 @@ def define_G(input_nc, output_nc, ngf, netG, n_downsample_global=3, n_blocks_glo
 def define_D(input_nc, ndf, n_layers_D, norm='instance', use_sigmoid=False, num_D=1, getIntermFeat=False, gpu_ids=[]):        
     norm_layer = get_norm_layer(norm_type=norm)   
     netD = MultiscaleDiscriminator(input_nc, ndf, n_layers_D, norm_layer, use_sigmoid, num_D, getIntermFeat)   
-    print(netD)
+    # print(netD) #TODO print network 3/4
     if len(gpu_ids) > 0:
         assert(torch.cuda.is_available())
         netD.cuda(gpu_ids[0])
@@ -59,7 +59,7 @@ def print_network(net):
     num_params = 0
     for param in net.parameters():
         num_params += param.numel()
-    print(net)
+    # print(net) #TODO print network 4/4
     print('Total number of parameters: %d' % num_params)
 
 ##############################################################################
