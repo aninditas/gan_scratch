@@ -1,0 +1,12 @@
+scratch_preprocessing/datasets/
+pix2pixHD/datasets
+*.jpg
+*.jpeg
+*.png
+*.npy
+*.txt
+*.csv
+*.zip
+*.pth
+*.html
+#!datasets/scratch_segment_aug/
