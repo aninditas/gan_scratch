@@ -8,6 +8,8 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import os
+import pandas as pd
+import shutil
 
 def load_image(info_dict_ns, image_size):
     """Load, resize, and extract lid area of the image
@@ -117,8 +119,6 @@ def add_scratch_to_lid(info_dict, scratch_new_segments):
         # remove scratch area that is close to the lid's edge
         temp = eroded_lid * info_dict['scratch'][str(sc)+'_aug']
         if np.count_nonzero(np.any([temp == i for i in scratch_new_segments])) == 0:
-        # if np.count_nonzero((temp==2)|(temp==3)) == 0 :
-        #     temp = temp*0
             continue
 
         # add augmented scratch to lid_scratch based on lid_normal
@@ -131,7 +131,6 @@ def generate_scratch_segments(number_of_generated_images, input_normal_segment, 
                               lid_normal_segment, lid_scratch_segment, scratch_segments, output_normal_random_image,
                               image_size, factor_shift, factor_rotate, scratch_new_segments,
                               output_scratch_before_after, output_scratch_segment_image, output_scratch_segment_npy):
-    print("STEP 1: GENERATING " + str(number_of_generated_images) + " NEW SCRATCH SEGMENTS")
     info_dict_list = []
     count_img = 0
     while count_img<number_of_generated_images:
@@ -165,9 +164,6 @@ def generate_scratch_segments(number_of_generated_images, input_normal_segment, 
 
         # if the new scratch image does not have any scratch, repeat the image generation
         if np.count_nonzero(np.any([info_dict['scratch']['image_aug_stack_n'] == i for i in scratch_new_segments])) == 0:
-        # if np.count_nonzero((info_dict['scratch']['image_aug_stack_n'] == 2) |
-        #                     (info_dict['scratch']['image_aug_stack_n'] == 3) |
-        #                     (info_dict['scratch']['image_aug_stack_n'] == 4)) == 0:
             continue
 
         norm = mpl.colors.Normalize(vmin=0, vmax=scratch_new_segments[-1]+1)
@@ -191,6 +187,27 @@ def generate_scratch_segments(number_of_generated_images, input_normal_segment, 
         info_dict_list.append(info_dict)
         count_img+=1
 
-    # with open(EXPORT_PATH + '/info_dict.pickle', 'wb') as f:
-    #     pickle.dump(info_dict_list, f)
+
+def split_light_dark_dataset(dataset_names, dataset_information, input_before_datasplit,
+                             input_file_name_datasplit, output_light_dark_datasplit):
+    if not os.path.isdir(os.path.join(output_light_dark_datasplit, 'data_1', 'train_A')):
+        for i in dataset_names:
+            os.mkdir(os.path.join(output_light_dark_datasplit, 'data_' + str(i)))
+            os.mkdir(os.path.join(output_light_dark_datasplit, 'data_' + str(i), 'train_A'))
+            os.mkdir(os.path.join(output_light_dark_datasplit, 'data_' + str(i), 'train_B'))
+            os.mkdir(os.path.join(output_light_dark_datasplit, 'data_' + str(i), 'test_A'))
+    for a, b in zip(dataset_names, dataset_information):
+        file_names = pd.DataFrame(pd.read_csv(os.path.join(input_file_name_datasplit, b+'.csv'))).to_numpy()[:,1]
+        for fn in file_names:
+            try:
+                source_A = os.path.join(input_before_datasplit, 'train_A', fn[:-4] + '_All.png')
+                source_B = os.path.join(input_before_datasplit, 'train_B', fn[:-4] + '_All.jpg')
+                dest_A = os.path.join(output_light_dark_datasplit, 'data_'+str(a), 'train_A', fn[:-4] + '_All.png')
+                dest_B = os.path.join(output_light_dark_datasplit, 'data_'+str(a), 'train_B', fn[:-4] + '_All.jpg')
+                shutil.copyfile(source_A, dest_A)
+                shutil.copyfile(source_B, dest_B)
+            except:
+                source_A = os.path.join(input_before_datasplit, 'test_A', fn[:-4] + '_All.png')
+                dest_A = os.path.join(output_light_dark_datasplit, 'data_' + str(a), 'test_A', fn[:-4] + '_All.png')
+                shutil.copyfile(source_A, dest_A)
 

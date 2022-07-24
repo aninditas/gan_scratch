@@ -1,34 +1,41 @@
 import os, cv2
 import numpy as np
-def cut_basic_units(output_scratch_segment_npy, output_scratch_basic_unit, image_size, scratch_new_segments):
-    print('STEP 2: CUT INTO BASIC UNITS')
-    name_list = os.listdir(output_scratch_segment_npy)
-    if not os.path.isdir(output_scratch_basic_unit + '\\' + "straight\\test_A"):
-        os.mkdir(output_scratch_basic_unit + '\\straight\\test_A')
-        os.mkdir(output_scratch_basic_unit + '\\curve\\test_A')
-        os.mkdir(output_scratch_basic_unit + '\\end\\test_A')
-        os.mkdir(output_scratch_basic_unit + '\\all\\test_A')
-    for name in name_list:
-        npy_file = np.load(output_scratch_segment_npy + "\\" + name)
-        straight = np.zeros(shape=tuple(reversed(image_size)) + (3,))
-        curve = np.zeros(shape=tuple(reversed(image_size)) + (3,))
-        end = np.zeros(shape=tuple(reversed(image_size)) + (3,))
-        LID = np.zeros(shape=tuple(reversed(image_size)) + (3,))
-        for i in range(image_size[1]):
-            for j in range(image_size[0]):
-                if npy_file[i, j] == scratch_new_segments[0]:
-                    straight[i, j] = [5, 4, 120]
-                    LID[i, j] = [128, 0, 0]
-                elif npy_file[i, j] == scratch_new_segments[1]:
-                    curve[i, j] = [5, 4, 120]
-                    LID[i, j] = [0, 128, 128]
-                elif npy_file[i, j] == scratch_new_segments[2]:
-                    end[i, j] = [5, 4, 120]
-                    LID[i, j] = [0, 128, 0]
-                elif npy_file[i, j] == 1:
-                    LID[i, j] = [0, 0, 128]
-        cv2.imwrite(output_scratch_basic_unit + "\\straight\\test_A\\" + name[:-4] + ".png", straight)
-        cv2.imwrite(output_scratch_basic_unit + "\\curve\\test_A\\" + name[:-4] + ".png", curve)
-        cv2.imwrite(output_scratch_basic_unit + "\\end\\test_A\\" + name[:-4] + ".png", end)
-        cv2.imwrite(output_scratch_basic_unit + "\\all\\test_A\\" + name[:-4] + ".png", LID)
+def cut_basic_units(output_scratch_segment_npy, output_scratch_basic_unit, folder, image_size, scratch_segments,
+                    scratch_basic_units,unit_single_color, unit_multi_colors, cut_image=False):
 
+    def _cut(parameters, loc):
+        units[scratch_basic_units[-1]][loc] = unit_multi_colors[-1]
+        for bu, ss, co in zip(scratch_basic_units[:len(scratch_segments)], parameters,
+                              unit_multi_colors[:len(scratch_segments)], ):
+            loc = np.where((segment_file==ss).all(axis=-1))
+            units[bu][loc] = unit_single_color
+            units[scratch_basic_units[-1]][loc] = co
+            if cut_image: units['image_cut'][bu][loc] = units['image'][bu][loc]
+        return units
+
+    name_list = os.listdir(output_scratch_segment_npy)
+    if not os.path.isdir(os.path.join(output_scratch_basic_unit, 'straight',folder)):
+        for s in scratch_basic_units:
+            os.mkdir(os.path.join(output_scratch_basic_unit, s, folder))
+            if cut_image: os.mkdir(os.path.join(output_scratch_basic_unit, s, folder[:-1]+'B'))
+
+    for name in name_list:
+        units = {}
+        units['image'] = {}
+        units['image_cut'] = {}
+        for s in scratch_basic_units:
+            units[s] = np.zeros(shape=tuple(reversed(image_size)) + (3,))
+            if cut_image:
+                units['image'][s] = cv2.imread(os.path.join(output_scratch_segment_npy[:-1]+'B', name[:-3]+'jpg'))
+                units['image_cut'][s] = np.zeros_like(units['image'][s])
+        try:
+            segment_file = np.load(os.path.join(output_scratch_segment_npy, name))
+            loc = np.where(segment_file > 0)
+            units = _cut(scratch_segments, loc)
+        except:
+            segment_file = cv2.imread(os.path.join(output_scratch_segment_npy, name))
+            loc = np.where(np.argmax(segment_file, axis=-1) > 0)
+            units = _cut(unit_multi_colors, loc)
+        for s in scratch_basic_units:
+            cv2.imwrite(os.path.join(output_scratch_basic_unit, str(s), folder, name[:-4] + ".png"), units[s])
+            if cut_image: cv2.imwrite(os.path.join(output_scratch_basic_unit, str(s), folder[:-1]+'B', name[:-4] + ".png"), units['image_cut'][s])

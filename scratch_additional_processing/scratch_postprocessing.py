@@ -2,7 +2,6 @@ import os, cv2
 import numpy as np
 
 def combine_scratch(output_pix2pix_inference, output_scratch_segment_npy, image_size, output_scratch_combined, scratch_new_segments):
-    print('STEP 5: COMBINE BASIC UNITS')
     gen_list = os.listdir(os.path.join(output_pix2pix_inference, "curve/test_latest/images/"))
 
     for num in range(len(gen_list)):
@@ -26,7 +25,6 @@ def combine_scratch(output_pix2pix_inference, output_scratch_segment_npy, image_
 
 
 def combine_LID(output_scratch_combined, output_scratch_segment_npy, output_normal_random_image, image_size, output_scratch_lid_combined):
-    print('STEP 6: COMBINE WITH LIDS')
     name_list = os.listdir(output_scratch_combined)
 
     for name in name_list:
