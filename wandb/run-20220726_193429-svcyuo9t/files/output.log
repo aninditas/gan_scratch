@@ -1,0 +1,108 @@
+INFO: Starting training:
+        Image:           data/1_input_scratch/JPEGImages
+        Label:           data/1_input_scratch/SegmentationClass
+        Checkpoints:     data/14_output_checkpoint_unet
+        Epochs:          500
+        Batch size:      1
+        Learning rate:   1e-05
+        Training size:   450
+        Validation size: 50
+        Checkpoints:     True
+        Device:          cuda
+        Images scaling:  0.5
+        Mixed Precision: False
+
+
+
+Epoch 1/500:  10%|█         | 45/450 [00:09<00:43,  9.27img/s, loss (batch)=0.852]
+
+
+
+
+Epoch 1/500:  20%|██        | 90/450 [00:19<00:40,  8.84img/s, loss (batch)=0.765]
+
+
+
+
+Epoch 1/500:  30%|███       | 135/450 [00:30<00:35,  8.96img/s, loss (batch)=0.719]
+
+
+
+
+Epoch 1/500:  40%|████      | 180/450 [00:40<00:30,  8.94img/s, loss (batch)=0.68]
+
+
+
+
+Epoch 1/500:  50%|█████     | 225/450 [00:50<00:25,  8.88img/s, loss (batch)=0.652]
+
+
+
+
+Epoch 1/500:  60%|██████    | 270/450 [01:00<00:19,  9.17img/s, loss (batch)=0.618]
+
+
+
+
+Epoch 1/500:  70%|███████   | 315/450 [01:10<00:15,  8.86img/s, loss (batch)=0.581]
+
+
+
+
+Epoch 1/500:  80%|████████  | 360/450 [01:20<00:10,  8.91img/s, loss (batch)=0.577]
+
+
+
+
+Epoch 1/500:  90%|█████████ | 405/450 [01:30<00:05,  8.90img/s, loss (batch)=0.523]
+
+
+
+
+Epoch 1/500: 100%|██████████| 450/450 [01:40<00:00,  9.09img/s, loss (batch)=0.553]
+
+Epoch 1/500: 100%|██████████| 450/450 [01:46<00:00,  4.25img/s, loss (batch)=0.553]
+INFO: Checkpoint 1 saved!
+
+
+
+Epoch 2/500:  10%|█         | 45/450 [00:07<00:45,  8.85img/s, loss (batch)=0.449]
+
+
+
+
+
+Epoch 2/500:  20%|██        | 90/450 [00:17<00:39,  9.01img/s, loss (batch)=0.474]
+
+
+
+
+Epoch 2/500:  30%|███       | 135/450 [00:27<00:35,  8.89img/s, loss (batch)=0.427]
+
+
+
+
+Epoch 2/500:  40%|████      | 180/450 [00:37<00:30,  8.82img/s, loss (batch)=0.331]
+
+
+
+
+Epoch 2/500:  50%|█████     | 225/450 [00:48<00:26,  8.65img/s, loss (batch)=0.341]
+
+
+
+
+Epoch 2/500:  60%|██████    | 270/450 [00:58<00:19,  9.11img/s, loss (batch)=0.303]
+
+
+
+
+Epoch 2/500:  70%|███████   | 315/450 [01:08<00:15,  8.46img/s, loss (batch)=0.297]
+
+
+
+Epoch 2/500:  80%|████████  | 360/450 [01:18<00:09,  9.09img/s, loss (batch)=0.358]
+
+
+
+

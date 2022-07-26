@@ -1,0 +1,31 @@
+2022-07-26 17:53:36,495 INFO    MainThread:40648 [wandb_setup.py:_flush():76] Configure stats pid to 40648
+2022-07-26 17:53:36,495 INFO    MainThread:40648 [wandb_setup.py:_flush():76] Loading settings from C:\Users\anindita\.config\wandb\settings
+2022-07-26 17:53:36,495 INFO    MainThread:40648 [wandb_setup.py:_flush():76] Loading settings from D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\settings
+2022-07-26 17:53:36,495 INFO    MainThread:40648 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2022-07-26 17:53:36,496 WARNING MainThread:40648 [wandb_setup.py:_flush():76] Could not find program at -m unet.utils.data_loading
+2022-07-26 17:53:36,496 INFO    MainThread:40648 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': None, 'program': '-m unet.utils.data_loading'}
+2022-07-26 17:53:36,497 INFO    MainThread:40648 [wandb_setup.py:_flush():76] Applying login settings: {'anonymous': 'must'}
+2022-07-26 17:53:36,497 INFO    MainThread:40648 [wandb_init.py:_log_setup():461] Logging user logs to D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175336-iz3nyrab\logs\debug.log
+2022-07-26 17:53:36,497 INFO    MainThread:40648 [wandb_init.py:_log_setup():462] Logging internal logs to D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175336-iz3nyrab\logs\debug-internal.log
+2022-07-26 17:53:36,497 INFO    MainThread:40648 [wandb_init.py:_jupyter_setup():411] configuring jupyter hooks <wandb.sdk.wandb_init._WandbInit object at 0x0000021209A48490>
+2022-07-26 17:53:36,498 INFO    MainThread:40648 [wandb_init.py:init():495] calling init triggers
+2022-07-26 17:53:36,498 INFO    MainThread:40648 [wandb_init.py:init():498] wandb.init called with sweep_config: {}
+config: {}
+2022-07-26 17:53:36,499 INFO    MainThread:40648 [wandb_init.py:init():548] starting backend
+2022-07-26 17:53:36,499 INFO    MainThread:40648 [backend.py:_multiprocessing_setup():97] multiprocessing start_methods=spawn, using: spawn
+2022-07-26 17:53:36,504 INFO    MainThread:40648 [backend.py:ensure_launched():217] starting backend process...
+2022-07-26 17:53:37,575 INFO    MainThread:40648 [backend.py:ensure_launched():222] started backend process with pid: 37788
+2022-07-26 17:53:37,576 INFO    MainThread:40648 [wandb_init.py:init():558] backend started and connected
+2022-07-26 17:53:37,689 INFO    MainThread:40648 [wandb_run.py:_label_probe_notebook():1084] probe notebook
+2022-07-26 17:53:37,690 INFO    MainThread:40648 [wandb_run.py:_label_probe_notebook():1094] Unable to probe notebook: 'NoneType' object has no attribute 'get'
+2022-07-26 17:53:37,690 INFO    MainThread:40648 [wandb_init.py:init():634] updated telemetry
+2022-07-26 17:53:37,838 INFO    MainThread:40648 [wandb_init.py:init():665] communicating run to backend with 30 second timeout
+2022-07-26 17:53:39,987 INFO    MainThread:40648 [wandb_run.py:_on_init():1919] communicating current version
+2022-07-26 17:53:40,146 INFO    MainThread:40648 [wandb_run.py:_on_init():1923] got version response 
+2022-07-26 17:53:40,146 INFO    MainThread:40648 [wandb_init.py:init():700] starting run threads in backend
+2022-07-26 17:53:40,374 INFO    MainThread:40648 [wandb_run.py:_console_start():1893] atexit reg
+2022-07-26 17:53:40,375 INFO    MainThread:40648 [wandb_run.py:_redirect():1766] redirect: SettingsConsole.WRAP
+2022-07-26 17:53:40,375 INFO    MainThread:40648 [wandb_run.py:_redirect():1803] Wrapping output streams.
+2022-07-26 17:53:40,379 INFO    MainThread:40648 [wandb_run.py:_redirect():1827] Redirects installed.
+2022-07-26 17:53:40,379 INFO    MainThread:40648 [wandb_init.py:init():732] run started, returning control to user process
+2022-07-26 17:53:40,380 INFO    MainThread:40648 [wandb_run.py:_config_callback():1131] config_cb None None {'epochs': 5, 'batch_size': 1, 'learning_rate': 1e-05, 'val_percent': 0.1, 'save_checkpoint': True, 'img_scale': 0.5, 'amp': False}

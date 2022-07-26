@@ -14,6 +14,7 @@ def evaluate(net, dataloader, device):
     for batch in tqdm(dataloader, total=num_val_batches, desc='Validation round', unit='batch', leave=False):
         image, mask_true = batch['image'], batch['mask']
         # move images and labels to correct device and type
+        mask_true = torch.where(mask_true > 1, 1, 0)
         image = image.to(device=device, dtype=torch.float32)
         mask_true = mask_true.to(device=device, dtype=torch.long)
         mask_true = F.one_hot(mask_true, net.n_classes).permute(0, 3, 1, 2).float()

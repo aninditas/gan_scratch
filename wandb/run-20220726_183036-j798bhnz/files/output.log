@@ -1,0 +1,79 @@
+INFO: Starting training:
+        Image:           data/1_input_scratch/JPEGImages
+        Label:           data/1_input_scratch/SegmentationClass
+        Checkpoints:     data/14_output_checkpoint_unet
+        Epochs:          5
+        Batch size:      1
+        Learning rate:   1e-05
+        Training size:   450
+        Validation size: 50
+        Checkpoints:     True
+        Device:          cuda
+        Images scaling:  0.1
+        Mixed Precision: False
+
+Epoch 1/5:  10%|█         | 45/450 [00:08<00:16, 24.76img/s, loss (batch)=0.824]
+
+
+
+Epoch 1/5:  20%|██        | 90/450 [00:17<00:18, 19.07img/s, loss (batch)=0.739]
+
+
+Epoch 1/5:  30%|███       | 135/450 [00:26<00:15, 19.73img/s, loss (batch)=0.685]
+
+
+Epoch 1/5:  40%|████      | 180/450 [00:34<00:13, 20.27img/s, loss (batch)=0.658]
+
+
+
+Epoch 1/5:  50%|█████     | 225/450 [00:43<00:11, 20.34img/s, loss (batch)=0.638]
+
+
+Epoch 1/5:  60%|██████    | 270/450 [00:52<00:09, 19.61img/s, loss (batch)=0.611]
+
+
+Epoch 1/5:  70%|███████   | 315/450 [01:01<00:06, 19.92img/s, loss (batch)=0.605]
+
+
+Epoch 1/5:  80%|████████  | 360/450 [01:10<00:04, 19.92img/s, loss (batch)=0.591]
+
+
+Epoch 1/5:  90%|█████████ | 405/450 [01:19<00:02, 21.33img/s, loss (batch)=0.572]
+
+
+Epoch 1/5: 100%|██████████| 450/450 [01:28<00:00, 19.14img/s, loss (batch)=0.519]
+
+
+
+Epoch 1/5: 100%|██████████| 450/450 [01:36<00:00,  4.65img/s, loss (batch)=0.519]
+Python 3.8.13 (default, Mar 28 2022, 06:59:08) [MSC v.1916 64 bit (AMD64)]
+Type 'copyright', 'credits' or 'license' for more information
+IPython 8.4.0 -- An enhanced Interactive Python. Type '?' for help.
+PyDev console: using IPython 8.4.0
+Python 3.8.13 (default, Mar 28 2022, 06:59:08) [MSC v.1916 64 bit (AMD64)] on win32
+Traceback (most recent call last):
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\IPython\core\interactiveshell.py", line 3398, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "<ipython-input-2-f75be44fa033>", line 1, in <cell line: 1>
+    torch.save(net.state_dict(), str(checkpoint / 'checkpoint_epoch{}.pth'.format(epoch)))
+TypeError: unsupported operand type(s) for /: 'str' and 'str'
+Traceback (most recent call last):
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\IPython\core\interactiveshell.py", line 3398, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "<ipython-input-3-b2da90de1eea>", line 1, in <cell line: 1>
+    str(checkpoint) / 'checkpoint_epoch{}.pth'.format(epoch)
+TypeError: unsupported operand type(s) for /: 'str' and 'str'
+Traceback (most recent call last):
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\IPython\core\interactiveshell.py", line 3398, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "<ipython-input-4-df89489c838e>", line 1, in <cell line: 1>
+    os.path.join(checkpoint,'checkpoint_epoch{}.pth'.format(epoch))
+NameError: name 'os' is not defined
+Out[6]: 'data/14_output_checkpoint_unet\\checkpoint_epoch1.pth'
+Out[7]: 'data/14_output_checkpoint_unet\\checkpoint_epoch_1.pth'
+Traceback (most recent call last):
+  File "D:/Dropbox/PhD/python/GAN_SCRATCH_1/unet/train.py", line 196, in <module>
+    train_net(net=net,
+  File "D:/Dropbox/PhD/python/GAN_SCRATCH_1/unet/train.py", line 149, in train_net
+    torch.save(net.state_dict(), os.path.join(checkpoint,'checkpoint_epoch_{}.pth'.format(epoch)))
+TypeError: unsupported operand type(s) for /: 'str' and 'str'

@@ -1,0 +1,47 @@
+INFO: Starting training:
+        Image:           data/1_input_scratch/JPEGImages
+        Label:           data/1_input_scratch/SegmentationClass
+        Checkpoints:     data/14_output_checkpoint_unet
+        Epochs:          5
+        Batch size:      1
+        Learning rate:   1e-05
+        Training size:   450
+        Validation size: 50
+        Checkpoints:     True
+        Device:          cuda
+        Images scaling:  0.1
+        Mixed Precision: False
+
+Epoch 1/5:  10%|█         | 45/450 [00:05<00:14, 27.72img/s, loss (batch)=0.832]
+Traceback (most recent call last):
+  File "D:/Dropbox/PhD/python/GAN_SCRATCH_1/unet/train.py", line 196, in <module>
+    train_net(net=net,
+  File "D:/Dropbox/PhD/python/GAN_SCRATCH_1/unet/train.py", line 130, in train_net
+    val_score = evaluate(net, val_loader, device)
+  File "D:\Dropbox\PhD\python\GAN_SCRATCH_1\unet\evaluate.py", line 23, in evaluate
+    mask_pred = net(image)
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\torch\nn\modules\module.py", line 1110, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "D:\Dropbox\PhD\python\GAN_SCRATCH_1\unet\unet_\unet_model.py", line 31, in forward
+    x = self.up1(x5, x4)
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\torch\nn\modules\module.py", line 1110, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "D:\Dropbox\PhD\python\GAN_SCRATCH_1\unet\unet_\unet_parts.py", line 68, in forward
+    return self.conv(x)
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\torch\nn\modules\module.py", line 1110, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "D:\Dropbox\PhD\python\GAN_SCRATCH_1\unet\unet_\unet_parts.py", line 25, in forward
+    return self.double_conv(x)
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\torch\nn\modules\module.py", line 1110, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\torch\nn\modules\container.py", line 141, in forward
+    input = module(input)
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\torch\nn\modules\module.py", line 1110, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\torch\nn\modules\activation.py", line 98, in forward
+    return F.relu(input, inplace=self.inplace)
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\torch\nn\functional.py", line 1440, in relu
+    result = torch.relu_(input)
+RuntimeError: CUDA error: device-side assert triggered
+CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.

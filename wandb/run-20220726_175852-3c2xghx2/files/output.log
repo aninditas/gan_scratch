@@ -1,0 +1,26 @@
+INFO: Starting training:
+        Image:           data/1_input_scratch/JPEGImages
+        Label:           data/1_input_scratch/SegmentationClass
+        Checkpoints:     data/14_output_checkpoint_unet
+        Epochs:          5
+        Batch size:      1
+        Learning rate:   1e-05
+        Training size:   450
+        Validation size: 50
+        Checkpoints:     True
+        Device:          cuda
+        Images scaling:  0.5
+        Mixed Precision: False
+Epoch 1/5:   0%|          | 0/450 [00:06<?, ?img/s]
+Traceback (most recent call last):
+  File "D:/Dropbox/PhD/python/GAN_SCRATCH_1/unet/train.py", line 196, in <module>
+    train_net(net=net,
+  File "D:/Dropbox/PhD/python/GAN_SCRATCH_1/unet/train.py", line 101, in train_net
+    + dice_loss(F.softmax(masks_pred, dim=1).float(),
+  File "D:\Dropbox\PhD\python\GAN_SCRATCH_1\unet\utils\dice_score.py", line 40, in dice_loss
+    return 1 - fn(input, target, reduce_batch_first=True)
+  File "D:\Dropbox\PhD\python\GAN_SCRATCH_1\unet\utils\dice_score.py", line 31, in multiclass_dice_coeff
+    dice += dice_coeff(input[:, channel, ...], target[:, channel, ...], reduce_batch_first, epsilon)
+  File "D:\Dropbox\PhD\python\GAN_SCRATCH_1\unet\utils\dice_score.py", line 12, in dice_coeff
+    inter = torch.dot(input.reshape(-1), target.reshape(-1))
+RuntimeError: CUDA error: CUBLAS_STATUS_NOT_INITIALIZED when calling `cublasCreate(handle)`

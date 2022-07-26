@@ -55,7 +55,8 @@ class BasicDataset(Dataset):
 
     def __getitem__(self, idx):
         name = self.ids[idx]
-        mask_file = list(self.masks_dir.glob(name + self.mask_suffix + '.*'))
+        # mask_file = list(self.masks_dir.glob(name + self.mask_suffix + '.*'))
+        mask_file = list(self.masks_dir.glob(name + '.*'))
         img_file = list(self.images_dir.glob(name + '.*'))
 
         assert len(img_file) == 1, f'Either no image or multiple images found for the ID {name}: {img_file}'

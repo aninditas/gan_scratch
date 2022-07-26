@@ -2,7 +2,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -11,18 +11,17 @@ from torch import optim
 from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 
-from utils.data_loading import BasicDataset, CarvanaDataset
-from utils.dice_score import dice_loss
-from evaluate import evaluate
-from unet_pytorch import UNet
-
-dir_img = Path('./data/imgs/')
-dir_mask = Path('./data/masks/')
-dir_checkpoint = Path('./checkpoints/')
+from unet.utils.data_loading import BasicDataset, CarvanaDataset
+from unet.utils.dice_score import dice_loss
+from unet.evaluate import evaluate
+from unet.unet_.unet_model import UNet
 
 
 def train_net(net,
               device,
+              image,
+              label,
+              checkpoint,
               epochs: int = 5,
               batch_size: int = 1,
               learning_rate: float = 1e-5,
@@ -32,9 +31,9 @@ def train_net(net,
               amp: bool = False):
     # 1. Create dataset
     try:
-        dataset = CarvanaDataset(dir_img, dir_mask, img_scale)
-    except (AssertionError, RuntimeError):
-        dataset = BasicDataset(dir_img, dir_mask, img_scale)
+        dataset = CarvanaDataset(image, label, img_scale)
+    except: #(AssertionError, RuntimeError):
+        dataset = BasicDataset(image, label, img_scale)
 
     # 2. Split into train / validation partitions
     n_val = int(len(dataset) * val_percent)
@@ -53,6 +52,9 @@ def train_net(net,
                                   amp=amp))
 
     logging.info(f'''Starting training:
+        Image:           {image}
+        Label:           {label}
+        Checkpoints:     {checkpoint}
         Epochs:          {epochs}
         Batch size:      {batch_size}
         Learning rate:   {learning_rate}
@@ -79,7 +81,7 @@ def train_net(net,
             for batch in train_loader:
                 images = batch['image']
                 true_masks = batch['mask']
-
+                true_masks = torch.where(true_masks > 1, 1, 0)
                 assert images.shape[1] == net.n_channels, \
                     f'Network has been defined with {net.n_channels} input channels, ' \
                     f'but loaded images have {images.shape[1]} channels. Please check that ' \
@@ -138,13 +140,16 @@ def train_net(net,
                         })
 
         if save_checkpoint:
-            Path(dir_checkpoint).mkdir(parents=True, exist_ok=True)
-            torch.save(net.state_dict(), str(dir_checkpoint / 'checkpoint_epoch{}.pth'.format(epoch)))
+            Path(checkpoint).mkdir(parents=True, exist_ok=True)
+            torch.save(net.state_dict(), os.path.join(checkpoint,'checkpoint_epoch_{}.pth'.format(epoch)))
             logging.info(f'Checkpoint {epoch} saved!')
 
 
 def get_args():
     parser = argparse.ArgumentParser(description='Train the UNet on images and target masks')
+    parser.add_argument('--image', type=str, default='data/1_input_scratch/JPEGImages', help='Path to image files')
+    parser.add_argument('--label', type=str, default='data/1_input_scratch/SegmentationClass', help='Path to label files')
+    parser.add_argument('--checkpoint', type=str, default='data/14_output_checkpoint_unet', help='Path to checkpoint files')
     parser.add_argument('--epochs', '-e', metavar='E', type=int, default=5, help='Number of epochs')
     parser.add_argument('--batch-size', '-b', dest='batch_size', metavar='B', type=int, default=1, help='Batch size')
     parser.add_argument('--learning-rate', '-l', metavar='LR', type=float, default=1e-5,
@@ -184,6 +189,9 @@ if __name__ == '__main__':
     net.to(device=device)
     try:
         train_net(net=net,
+                  image=args.image,
+                  label=args.label,
+                  checkpoint=args.checkpoint,
                   epochs=args.epochs,
                   batch_size=args.batch_size,
                   learning_rate=args.lr,

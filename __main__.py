@@ -48,7 +48,7 @@ if __name__ == '__main__':
     dataset_training_split = [40, 50, 0, 300]
     dataset_information = ['dark_LID_white_scratch', 'dark_LID_black_scratch', 'light_LID_white_scratch', 'light_LID_black_scratch']
 
-    steps = [11, 12, 13]
+    steps = [14]
 
     # NEW SCRATCH GENERATION
     if 1 in steps:
@@ -142,3 +142,7 @@ if __name__ == '__main__':
         fid_score = calculate_frechet_distance(ori['m'], ori['s'], syn['m'], syn['s'])
         print('FID SCORES = ',fid_score)
 
+    # RUN UNET
+    if 14 in steps:
+        print('STEP 14: RUN UNET')
+        os.system('cmd /c "python unet/train.py --scale 0.5 --epochs 500 --batch-size 1"')

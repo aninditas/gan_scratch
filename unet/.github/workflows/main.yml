@@ -32,7 +32,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: milesial/unet
+          images: milesial/unet_
 
       - name: Build and push Docker image
         id: docker_build

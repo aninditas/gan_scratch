@@ -1,0 +1,22 @@
+INFO: Starting training:
+        Image:           data/1_input_scratch/JPEGImages
+        Label:           data/1_input_scratch/SegmentationClass
+        Checkpoints:     data/14_output_checkpoint_unet
+        Epochs:          5
+        Batch size:      1
+        Learning rate:   1e-05
+        Training size:   450
+        Validation size: 50
+        Checkpoints:     True
+        Device:          cuda
+        Images scaling:  0.5
+        Mixed Precision: False
+Epoch 1/5:   0%|          | 0/450 [00:04<?, ?img/s]
+Traceback (most recent call last):
+  File "D:/Dropbox/PhD/python/GAN_SCRATCH_1/unet/train.py", line 196, in <module>
+    train_net(net=net,
+  File "D:/Dropbox/PhD/python/GAN_SCRATCH_1/unet/train.py", line 102, in train_net
+    F.one_hot(true_masks, net.n_classes).permute(0, 3, 1, 2).float(),
+RuntimeError: CUDA error: device-side assert triggered
+CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1.

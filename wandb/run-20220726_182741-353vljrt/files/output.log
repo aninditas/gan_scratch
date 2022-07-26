@@ -1,0 +1,41 @@
+INFO: Starting training:
+        Image:           data/1_input_scratch/JPEGImages
+        Label:           data/1_input_scratch/SegmentationClass
+        Checkpoints:     data/14_output_checkpoint_unet
+        Epochs:          5
+        Batch size:      1
+        Learning rate:   1e-05
+        Training size:   450
+        Validation size: 50
+        Checkpoints:     True
+        Device:          cuda
+        Images scaling:  0.1
+        Mixed Precision: False
+
+Epoch 1/5:  10%|█         | 45/450 [00:05<00:13, 29.43img/s, loss (batch)=0.805]
+
+Epoch 1/5:  20%|██        | 90/450 [00:10<00:16, 22.37img/s, loss (batch)=0.716]
+
+Epoch 1/5:  30%|███       | 135/450 [00:14<00:11, 28.56img/s, loss (batch)=0.699]
+
+Epoch 1/5:  40%|████      | 180/450 [00:18<00:09, 27.86img/s, loss (batch)=0.643]
+
+Epoch 1/5:  50%|█████     | 225/450 [00:22<00:07, 28.40img/s, loss (batch)=0.613]
+
+Epoch 1/5:  60%|██████    | 270/450 [00:26<00:06, 28.87img/s, loss (batch)=0.609]
+
+
+Epoch 1/5:  70%|███████   | 315/450 [00:31<00:04, 31.68img/s, loss (batch)=0.586]
+
+Epoch 1/5:  80%|████████  | 360/450 [00:35<00:03, 28.50img/s, loss (batch)=0.544]
+
+Epoch 1/5:  90%|█████████ | 405/450 [00:39<00:01, 28.64img/s, loss (batch)=0.547]
+
+Epoch 1/5: 100%|██████████| 450/450 [00:43<00:00, 28.76img/s, loss (batch)=0.515]
+Epoch 1/5: 100%|██████████| 450/450 [00:47<00:00,  9.47img/s, loss (batch)=0.515]
+Traceback (most recent call last):
+  File "D:/Dropbox/PhD/python/GAN_SCRATCH_1/unet/train.py", line 196, in <module>
+    train_net(net=net,
+  File "D:/Dropbox/PhD/python/GAN_SCRATCH_1/unet/train.py", line 149, in train_net
+    torch.save(net.state_dict(), str(checkpoint / 'checkpoint_epoch{}.pth'.format(epoch)))
+TypeError: unsupported operand type(s) for /: 'str' and 'str'

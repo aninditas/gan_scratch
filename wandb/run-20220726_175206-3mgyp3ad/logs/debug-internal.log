@@ -1,0 +1,164 @@
+2022-07-26 17:52:07,823 INFO    MainThread:15240 [internal.py:wandb_internal():90] W&B internal server running at pid: 15240, started at: 2022-07-26 17:52:07.823218
+2022-07-26 17:52:07,825 INFO    WriterThread:15240 [datastore.py:open_for_write():75] open: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\run-3mgyp3ad.wandb
+2022-07-26 17:52:07,828 DEBUG   SenderThread:15240 [sender.py:send():236] send: header
+2022-07-26 17:52:07,828 DEBUG   SenderThread:15240 [sender.py:send():236] send: run
+2022-07-26 17:52:07,830 INFO    SenderThread:15240 [sender.py:_maybe_setup_resume():493] checking resume status for None/U-Net/3mgyp3ad
+2022-07-26 17:52:08,309 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: check_version
+2022-07-26 17:52:08,314 INFO    SenderThread:15240 [dir_watcher.py:__init__():216] watching files in: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files
+2022-07-26 17:52:08,314 INFO    SenderThread:15240 [sender.py:_start_run_threads():815] run started: 3mgyp3ad with start time 1658829126
+2022-07-26 17:52:08,314 DEBUG   SenderThread:15240 [sender.py:send():236] send: summary
+2022-07-26 17:52:08,315 INFO    SenderThread:15240 [sender.py:_save_file():952] saving file wandb-summary.json with policy end
+2022-07-26 17:52:08,315 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: check_version
+2022-07-26 17:52:08,437 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: run_start
+2022-07-26 17:52:08,443 DEBUG   HandlerThread:15240 [meta.py:__init__():35] meta init
+2022-07-26 17:52:08,443 DEBUG   HandlerThread:15240 [meta.py:__init__():49] meta init done
+2022-07-26 17:52:08,443 DEBUG   HandlerThread:15240 [meta.py:probe():209] probe
+2022-07-26 17:52:08,459 DEBUG   HandlerThread:15240 [meta.py:_setup_git():199] setup git
+2022-07-26 17:52:08,535 DEBUG   HandlerThread:15240 [meta.py:_setup_git():206] setup git done
+2022-07-26 17:52:08,535 DEBUG   HandlerThread:15240 [meta.py:_save_pip():53] save pip
+2022-07-26 17:52:08,536 DEBUG   HandlerThread:15240 [meta.py:_save_pip():67] save pip done
+2022-07-26 17:52:08,536 DEBUG   HandlerThread:15240 [meta.py:_save_conda():74] save conda
+2022-07-26 17:52:08,538 ERROR   HandlerThread:15240 [meta.py:_save_conda():83] Error saving conda packages
+Traceback (most recent call last):
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\site-packages\wandb\sdk\internal\meta.py", line 79, in _save_conda
+    subprocess.call(
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\subprocess.py", line 340, in call
+    with Popen(*popenargs, **kwargs) as p:
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\subprocess.py", line 858, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Users\anindita\anaconda3\envs\envTorch1\lib\subprocess.py", line 1311, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+FileNotFoundError: [WinError 2] The system cannot find the file specified
+2022-07-26 17:52:08,539 DEBUG   HandlerThread:15240 [meta.py:_save_conda():84] save conda done
+2022-07-26 17:52:08,539 DEBUG   HandlerThread:15240 [meta.py:probe():247] probe done
+2022-07-26 17:52:08,632 DEBUG   SenderThread:15240 [sender.py:send():236] send: files
+2022-07-26 17:52:08,632 INFO    SenderThread:15240 [sender.py:_save_file():952] saving file wandb-metadata.json with policy now
+2022-07-26 17:52:08,633 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: stop_status
+2022-07-26 17:52:08,634 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: stop_status
+2022-07-26 17:52:08,863 DEBUG   SenderThread:15240 [sender.py:send():236] send: telemetry
+2022-07-26 17:52:08,863 DEBUG   SenderThread:15240 [sender.py:send():236] send: config
+2022-07-26 17:52:09,220 INFO    Thread-17 :15240 [upload_job.py:push():138] Uploaded file C:\Users\anindita\AppData\Local\Temp\tmphb2d9dz1wandb\lqd2qxn4-wandb-metadata.json
+2022-07-26 17:52:09,317 INFO    Thread-11 :15240 [dir_watcher.py:_on_file_created():269] file/dir created: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\requirements.txt
+2022-07-26 17:52:09,318 INFO    Thread-11 :15240 [dir_watcher.py:_on_file_created():269] file/dir created: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\wandb-summary.json
+2022-07-26 17:52:09,318 INFO    Thread-11 :15240 [dir_watcher.py:_on_file_created():269] file/dir created: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\output.log
+2022-07-26 17:52:09,318 INFO    Thread-11 :15240 [dir_watcher.py:_on_file_created():269] file/dir created: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\conda-environment.yaml
+2022-07-26 17:52:09,318 INFO    Thread-11 :15240 [dir_watcher.py:_on_file_created():269] file/dir created: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\wandb-metadata.json
+2022-07-26 17:52:10,416 DEBUG   SenderThread:15240 [sender.py:send():236] send: telemetry
+2022-07-26 17:52:11,143 DEBUG   SenderThread:15240 [sender.py:send():236] send: exit
+2022-07-26 17:52:11,143 INFO    SenderThread:15240 [sender.py:send_exit():372] handling exit code: 1
+2022-07-26 17:52:11,143 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:11,143 INFO    SenderThread:15240 [sender.py:send_exit():374] handling runtime: 2
+2022-07-26 17:52:11,144 INFO    SenderThread:15240 [sender.py:_save_file():952] saving file wandb-summary.json with policy end
+2022-07-26 17:52:11,144 INFO    SenderThread:15240 [sender.py:send_exit():380] send defer
+2022-07-26 17:52:11,145 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:11,145 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:11,145 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 0
+2022-07-26 17:52:11,145 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:11,145 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 0
+2022-07-26 17:52:11,145 INFO    SenderThread:15240 [sender.py:transition_state():393] send defer: 1
+2022-07-26 17:52:11,146 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:11,146 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 1
+2022-07-26 17:52:11,210 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:11,210 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 1
+2022-07-26 17:52:11,210 INFO    SenderThread:15240 [sender.py:transition_state():393] send defer: 2
+2022-07-26 17:52:11,211 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:11,211 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 2
+2022-07-26 17:52:11,211 DEBUG   SenderThread:15240 [sender.py:send():236] send: stats
+2022-07-26 17:52:11,211 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:11,211 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 2
+2022-07-26 17:52:11,211 INFO    SenderThread:15240 [sender.py:transition_state():393] send defer: 3
+2022-07-26 17:52:11,211 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:11,211 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 3
+2022-07-26 17:52:11,212 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:11,212 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 3
+2022-07-26 17:52:11,212 INFO    SenderThread:15240 [sender.py:transition_state():393] send defer: 4
+2022-07-26 17:52:11,212 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:11,212 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 4
+2022-07-26 17:52:11,212 DEBUG   SenderThread:15240 [sender.py:send():236] send: summary
+2022-07-26 17:52:11,213 INFO    SenderThread:15240 [sender.py:_save_file():952] saving file wandb-summary.json with policy end
+2022-07-26 17:52:11,213 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:11,213 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 4
+2022-07-26 17:52:11,213 INFO    SenderThread:15240 [sender.py:transition_state():393] send defer: 5
+2022-07-26 17:52:11,213 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:11,214 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 5
+2022-07-26 17:52:11,214 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:11,214 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 5
+2022-07-26 17:52:11,248 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:11,326 INFO    Thread-11 :15240 [dir_watcher.py:_on_file_modified():286] file/dir modified: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\output.log
+2022-07-26 17:52:11,326 INFO    Thread-11 :15240 [dir_watcher.py:_on_file_modified():286] file/dir modified: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\wandb-summary.json
+2022-07-26 17:52:11,498 INFO    SenderThread:15240 [sender.py:transition_state():393] send defer: 6
+2022-07-26 17:52:11,498 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:11,498 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:11,498 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 6
+2022-07-26 17:52:11,498 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:11,498 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 6
+2022-07-26 17:52:11,498 INFO    SenderThread:15240 [dir_watcher.py:finish():353] shutting down directory watcher
+2022-07-26 17:52:11,602 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:12,336 INFO    SenderThread:15240 [dir_watcher.py:_on_file_modified():286] file/dir modified: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\config.yaml
+2022-07-26 17:52:12,336 INFO    SenderThread:15240 [dir_watcher.py:finish():383] scan: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files
+2022-07-26 17:52:12,336 INFO    SenderThread:15240 [dir_watcher.py:finish():397] scan save: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\conda-environment.yaml conda-environment.yaml
+2022-07-26 17:52:12,337 INFO    SenderThread:15240 [dir_watcher.py:finish():397] scan save: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\config.yaml config.yaml
+2022-07-26 17:52:12,337 INFO    SenderThread:15240 [dir_watcher.py:finish():397] scan save: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\output.log output.log
+2022-07-26 17:52:12,337 INFO    SenderThread:15240 [dir_watcher.py:finish():397] scan save: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\requirements.txt requirements.txt
+2022-07-26 17:52:12,340 INFO    SenderThread:15240 [dir_watcher.py:finish():397] scan save: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\wandb-metadata.json wandb-metadata.json
+2022-07-26 17:52:12,341 INFO    SenderThread:15240 [dir_watcher.py:finish():397] scan save: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\wandb-summary.json wandb-summary.json
+2022-07-26 17:52:12,343 INFO    SenderThread:15240 [sender.py:transition_state():393] send defer: 7
+2022-07-26 17:52:12,343 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:12,346 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:12,346 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 7
+2022-07-26 17:52:12,346 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:12,346 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 7
+2022-07-26 17:52:12,347 INFO    SenderThread:15240 [file_pusher.py:finish():171] shutting down file pusher
+2022-07-26 17:52:12,444 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:12,444 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:12,553 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:12,553 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:12,660 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:12,660 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:12,769 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:12,770 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:12,877 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:12,877 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:12,881 INFO    Thread-18 :15240 [upload_job.py:push():138] Uploaded file D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\config.yaml
+2022-07-26 17:52:12,954 INFO    Thread-21 :15240 [upload_job.py:push():138] Uploaded file D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\wandb-summary.json
+2022-07-26 17:52:12,985 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:12,985 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:13,000 INFO    Thread-20 :15240 [upload_job.py:push():138] Uploaded file D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\requirements.txt
+2022-07-26 17:52:13,095 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:13,095 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:13,114 INFO    Thread-19 :15240 [upload_job.py:push():138] Uploaded file D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\files\output.log
+2022-07-26 17:52:13,203 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:13,203 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:13,313 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:13,313 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:13,328 INFO    Thread-10 :15240 [sender.py:transition_state():393] send defer: 8
+2022-07-26 17:52:13,328 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:13,328 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 8
+2022-07-26 17:52:13,328 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:13,328 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 8
+2022-07-26 17:52:13,422 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:13,566 INFO    SenderThread:15240 [sender.py:transition_state():393] send defer: 9
+2022-07-26 17:52:13,566 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:13,567 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:13,567 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 9
+2022-07-26 17:52:13,567 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:13,567 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 9
+2022-07-26 17:52:13,567 INFO    SenderThread:15240 [sender.py:transition_state():393] send defer: 10
+2022-07-26 17:52:13,567 DEBUG   SenderThread:15240 [sender.py:send():236] send: final
+2022-07-26 17:52:13,567 DEBUG   SenderThread:15240 [sender.py:send():236] send: footer
+2022-07-26 17:52:13,567 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: defer
+2022-07-26 17:52:13,567 INFO    HandlerThread:15240 [handler.py:handle_request_defer():163] handle defer: 10
+2022-07-26 17:52:13,567 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: defer
+2022-07-26 17:52:13,567 INFO    SenderThread:15240 [sender.py:send_request_defer():389] handle sender defer: 10
+2022-07-26 17:52:13,672 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: poll_exit
+2022-07-26 17:52:13,672 DEBUG   SenderThread:15240 [sender.py:send_request():250] send_request: poll_exit
+2022-07-26 17:52:13,672 INFO    SenderThread:15240 [file_pusher.py:join():176] waiting for file pusher
+2022-07-26 17:52:14,216 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: sampled_history
+2022-07-26 17:52:14,217 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: get_summary
+2022-07-26 17:52:14,217 DEBUG   HandlerThread:15240 [handler.py:handle_request():140] handle_request: shutdown
+2022-07-26 17:52:14,218 INFO    HandlerThread:15240 [handler.py:finish():806] shutting down handler
+2022-07-26 17:52:14,574 INFO    WriterThread:15240 [datastore.py:close():279] close: D:\Dropbox\PhD\python\GAN_SCRATCH_1\wandb\run-20220726_175206-3mgyp3ad\run-3mgyp3ad.wandb
+2022-07-26 17:52:15,117 INFO    SenderThread:15240 [sender.py:finish():1114] shutting down sender
+2022-07-26 17:52:15,117 INFO    SenderThread:15240 [file_pusher.py:finish():171] shutting down file pusher
+2022-07-26 17:52:15,117 INFO    SenderThread:15240 [file_pusher.py:join():176] waiting for file pusher
+2022-07-26 17:52:15,119 INFO    MainThread:15240 [internal.py:handle_exit():80] Internal process exited
