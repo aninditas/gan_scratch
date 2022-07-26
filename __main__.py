@@ -1,21 +1,13 @@
-import os
-import pickle
-# import random
-# import gc
-# import cv2
-# import imutils
 import numpy as np
-# import matplotlib as mpl
-# import matplotlib.cm as cm
-# import matplotlib.pyplot as plt
-# from pix2pixHD import train
 import os
 from itertools import product
 
-from scratch_additional_processing.eval import calculate_activation_statistics
+from scratch_additional_processing.eval import calculate_m_s, augment_image
+from scratch_additional_processing.frechet_distance import calculate_frechet_distance
 from scratch_additional_processing.scratch_preprocessing import generate_scratch_segments, split_light_dark_dataset
 from scratch_additional_processing.cut_basic_units import cut_basic_units
 from scratch_additional_processing.scratch_postprocessing import combine_scratch, combine_LID
+
 
 if __name__ == '__main__':
     image_size = (320, 240)
@@ -25,6 +17,7 @@ if __name__ == '__main__':
 
     input_normal_segment = 'data/1_input_scratch/SegmentationClass/'
     input_scratch_segment = 'data/1_input_scratch/SegmentationClass/'
+    input_original_image_scratch = 'data/1_input_scratch/JPEGImages'
     output_scratch_before_after = 'data/2_output_scratch_before_after'
     output_normal_random_image = 'data/2_output_normal_random_selection'
     output_scratch_segment_image = 'data/2_output_scratch_segment_image'
@@ -37,6 +30,9 @@ if __name__ == '__main__':
     output_pix2pix_inference = 'data/9_output_pix2pix_inference'
     output_scratch_combined = 'data/10_output_scratch_combined/'
     output_scratch_lid_combined = 'data/11_output_scratch_lid_combined'
+    output_fid_scores = 'data/12_output_fid_scores'
+    output_std_aug_images = 'data/13_output_std_aug_images'
+
 
     lid_normal_segments = [1,2,3, 4] # the lid's segment number of normal images
     lid_scratch_segments = [1, 2, 3, 4] # the lid and scratch's segment number of scratch images
@@ -52,8 +48,7 @@ if __name__ == '__main__':
     dataset_training_split = [40, 50, 0, 300]
     dataset_information = ['dark_LID_white_scratch', 'dark_LID_black_scratch', 'light_LID_white_scratch', 'light_LID_black_scratch']
 
-    # steps = [1,2,3,4,5,6,7,8]
-    steps = [1,2,6,7,8]
+    steps = [11, 12, 13]
 
     # NEW SCRATCH GENERATION
     if 1 in steps:
@@ -119,12 +114,31 @@ if __name__ == '__main__':
         print('STEP 8: COMBINE WITH LIDS')
         combine_LID(output_scratch_combined, output_scratch_segment_npy, output_normal_random_image, image_size, output_scratch_lid_combined)
 
-    # CALCULATE FRECHET DISTANCE
+    # CALCULATE M S ORIGINAL IMAGE
     if 9 in steps:
-        d = 'D:\Dropbox\PhD\python\giraffe\data\comprehensive_cars\images_256'
-        dd = []
-        for f in os.listdir(d): dd.append(os.path.join(d, f))
+        print('STEP 9: CALCULATE M S ORIGINAL')
+        calculate_m_s(input_original_image_scratch, os.path.join(output_fid_scores,'original_scratch.npz'))
 
-        m, s = calculate_activation_statistics(dd)
-        c = 'D:\Dropbox\PhD\python\giraffe\data\comprehensive_cars\\fid_files_256\cars.npz'
-        np.savez(c, m=m, s=s)
+    # CALCULATE M S SYNTHETIC IMAGE
+    if 10 in steps:
+        print('STEP 10: CALCULATE M S SYNTHETIC')
+        calculate_m_s(output_scratch_lid_combined, os.path.join(output_fid_scores, 'synthetic_scratch.npz'))
+
+    # STANDARD AUGMENTATION
+    if 11 in steps:
+        print('STEP 11: BUILDING STANDARD AUGMENTATION IMAGES')
+        augment_image(input_original_image_scratch, output_std_aug_images, number_of_generated_images, image_size)
+
+    # CALCULATE M S STD AUG IMAGE
+    if 12 in steps:
+        print('STEP 10: CALCULATE M S STD AUG')
+        calculate_m_s(output_std_aug_images, os.path.join(output_fid_scores, 'std_aug_scratch.npz'))
+
+    # CALCULATE FRECHET
+    if 13 in steps:
+        print('STEP 11: CALCULATE FRECHET')
+        ori = np.load(os.path.join(output_fid_scores,'original_scratch.npz'))
+        syn = np.load(os.path.join(output_fid_scores, 'std_aug_scratch.npz'))
+        fid_score = calculate_frechet_distance(ori['m'], ori['s'], syn['m'], syn['s'])
+        print('FID SCORES = ',fid_score)
+

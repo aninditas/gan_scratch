@@ -12,5 +12,6 @@
 *.xls
 *.pyc
 *.json
+*.npz
 file_name/
 #!datasets/scratch_segment_aug/
