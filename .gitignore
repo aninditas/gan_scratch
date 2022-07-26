@@ -10,5 +10,7 @@
 *.sh
 *.gif
 *.xls
+*.pyc
+*.json
 file_name/
 #!datasets/scratch_segment_aug/

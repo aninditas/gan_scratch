@@ -7,7 +7,7 @@ def cut_basic_units(output_scratch_segment_npy, output_scratch_basic_unit, folde
         units[scratch_basic_units[-1]][loc] = unit_multi_colors[-1]
         for bu, ss, co in zip(scratch_basic_units[:len(scratch_segments)], parameters,
                               unit_multi_colors[:len(scratch_segments)], ):
-            loc = np.where((segment_file==ss).all(axis=-1))
+            loc = np.where((segment_file==ss).all(axis=-1)) if cut_image else np.where(segment_file==ss)
             units[bu][loc] = unit_single_color
             units[scratch_basic_units[-1]][loc] = co
             if cut_image: units['image_cut'][bu][loc] = units['image'][bu][loc]
