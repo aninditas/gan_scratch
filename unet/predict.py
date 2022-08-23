@@ -8,17 +8,19 @@ import torch.nn.functional as F
 from PIL import Image
 from torchvision import transforms
 
-from utils.data_loading import BasicDataset
-from unet_pytorch import UNet
-from utils.utils import plot_img_and_mask
+from s_utils.data_loading import BasicDataset
+# from unet.unet_pytorch import UNet
+from unet.unet_.unet_model import UNet
+from unet.utils.utils import plot_img_and_mask
 
 def predict_img(net,
                 full_img,
                 device,
+                new_w, new_h,
                 scale_factor=1,
                 out_threshold=0.5):
     net.eval()
-    img = torch.from_numpy(BasicDataset.preprocess(full_img, scale_factor, is_mask=False))
+    img = torch.from_numpy(BasicDataset.preprocess(full_img, scale_factor, is_mask=False, new_w=new_w, new_h=new_h))
     img = img.unsqueeze(0)
     img = img.to(device=device, dtype=torch.float32)
 
@@ -58,6 +60,8 @@ def get_args():
     parser.add_argument('--scale', '-s', type=float, default=0.5,
                         help='Scale factor for the input images')
     parser.add_argument('--bilinear', action='store_true', default=False, help='Use bilinear upsampling')
+    parser.add_argument('--new_w', type=int, default=None, help='New image size')
+    parser.add_argument('--new_h', type=int, default=None, help='New image size')
 
     return parser.parse_args()
 
@@ -91,22 +95,25 @@ if __name__ == '__main__':
     net.load_state_dict(torch.load(args.model, map_location=device))
 
     logging.info('Model loaded!')
-
-    for i, filename in enumerate(in_files):
+    # assert len(in_files)>0, "zero images found"
+    for i, filename in enumerate(os.listdir(in_files[0])):
         logging.info(f'\nPredicting image {filename} ...')
-        img = Image.open(filename)
+        # assert os.path.isfile(filename), "{} is not an image".format(filename)
+        img = Image.open(os.path.join(in_files[0],filename))
 
         mask = predict_img(net=net,
                            full_img=img,
+                           new_w=args.new_w,
+                           new_h=args.new_h,
                            scale_factor=args.scale,
                            out_threshold=args.mask_threshold,
                            device=device)
 
         if not args.no_save:
-            out_filename = out_files[i]
+            # out_filename = out_files[0]
             result = mask_to_image(mask)
-            result.save(out_filename)
-            logging.info(f'Mask saved to {out_filename}')
+            result.save(os.path.join(out_files[0],str(i)+'.jpg'))
+            logging.info(f'Mask saved to {str(i)}')
 
         if args.viz:
             logging.info(f'Visualizing results for image {filename}, close to continue...')

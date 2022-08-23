@@ -5,7 +5,7 @@ from torch.nn.functional import adaptive_avg_pool2d
 from PIL import Image
 from tqdm import tqdm
 # from inception import InceptionV3
-from scratch_additional_processing.inception import InceptionV3
+from s_utils.inception import InceptionV3
 
 '''
 NOTE: The code is largely adopted from:

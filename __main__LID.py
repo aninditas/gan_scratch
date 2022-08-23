@@ -65,9 +65,9 @@ if __name__ == '__main__':
     data_split = 3
 
     # steps = [2,3,4,5,6,7,8,14,17]
-    # steps = [2,3,4, 5, 6, 7, 8, 14, 16, 17]
-    # # steps = [11, 14, 16, 17]
-    # # steps = [17]
+    steps = [2,3,4, 5, 6, 7, 8, 14, 16, 17]
+    # steps = [11, 14, 16, 17]
+    # steps = [17]
 
 
     # SPLIT LIGHT DARK FOR GENERATOR TRAINING

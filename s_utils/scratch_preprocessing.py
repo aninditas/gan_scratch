@@ -17,10 +17,10 @@ def load_image(info_dict_ns, image_size):
     :return: info_dict normal pr scratch with updated data
     """
     info_dict_ns['image'] = cv2.resize(
-        cv2.imread(info_dict_ns['path'][:-18]+ 'JPEGImages/'+ info_dict_ns['idx_file_random'][:-4]+'.jpg'),
+        cv2.imread(os.path.join(info_dict_ns['path'][:-18], 'JPEGImages', info_dict_ns['idx_file_random'][:-4]+'.jpg')),
         dsize=image_size,interpolation=cv2.INTER_NEAREST)
     info_dict_ns['npy'] = cv2.resize(
-        np.array(np.load(info_dict_ns['path'] + info_dict_ns['idx_file_random']), dtype='uint8'), dsize=image_size,
+        np.array(np.load(os.path.join(info_dict_ns['path'], info_dict_ns['idx_file_random'])), dtype='uint8'), dsize=image_size,
         interpolation=cv2.INTER_NEAREST)
     info_dict_ns['lid'] = np.array(
         [1 if ii in info_dict_ns['idx_segment'] else 0 for i in info_dict_ns['npy'] for ii in i]).reshape(
@@ -130,7 +130,8 @@ def add_scratch_to_lid(info_dict, scratch_new_segments):
 def generate_scratch_segments(number_of_generated_images, input_normal_segment, input_scratch_segment,
                               lid_normal_segment, lid_scratch_segment, scratch_segments, output_normal_random_image,
                               image_size, factor_shift, factor_rotate, scratch_new_segments,
-                              output_scratch_before_after, output_scratch_segment_image, output_scratch_segment_npy):
+                              output_scratch_before_after, output_scratch_segment_image, output_scratch_segment_npy,
+                              flatten_bg_lid=False, bg=[], lid=[]):
     info_dict_list = []
     count_img = 0
     while count_img<number_of_generated_images:
@@ -165,6 +166,14 @@ def generate_scratch_segments(number_of_generated_images, input_normal_segment, 
         # if the new scratch image does not have any scratch, repeat the image generation
         if np.count_nonzero(np.any([info_dict['scratch']['image_aug_stack_n'] == i for i in scratch_new_segments])) == 0:
             continue
+
+        if flatten_bg_lid:
+            for bg_ in bg:
+                temp = np.where(info_dict['scratch']['image_aug_stack_n']==bg_)
+                info_dict['scratch']['image_aug_stack_n'][temp]=0
+            for lid_ in lid:
+                temp = np.where(info_dict['scratch']['image_aug_stack_n'] == lid_)
+                info_dict['scratch']['image_aug_stack_n'][temp] = 1
 
         norm = mpl.colors.Normalize(vmin=0, vmax=scratch_new_segments[-1]+1)
         cmap = cm.nipy_spectral # change the cmap here if you want to change the color. Options available at https://matplotlib.org/3.5.0/tutorials/colors/colormaps.html

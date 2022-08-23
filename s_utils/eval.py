@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import tqdm, random
 
-from scratch_additional_processing.frechet_distance import calculate_activation_statistics
+from s_utils.frechet_distance import calculate_activation_statistics
 
 
 def calculate_m_s(image_folder, output_fid_scores):
