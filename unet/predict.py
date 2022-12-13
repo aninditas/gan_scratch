@@ -8,9 +8,9 @@ import torch.nn.functional as F
 from PIL import Image
 from torchvision import transforms
 
-from s_utils.data_loading import BasicDataset
+from s_utils.data_loading import SegmentationDataset
 # from unet.unet_pytorch import UNet
-from unet.unet_.unet_model import UNet
+from s_models.unet_model import UNet
 from unet.utils.utils import plot_img_and_mask
 
 def predict_img(net,
@@ -20,7 +20,7 @@ def predict_img(net,
                 scale_factor=1,
                 out_threshold=0.5):
     net.eval()
-    img = torch.from_numpy(BasicDataset.preprocess(full_img, scale_factor, is_mask=False, new_w=new_w, new_h=new_h))
+    img = torch.from_numpy(SegmentationDataset.preprocess(full_img, scale_factor, is_mask=False, new_w=new_w, new_h=new_h))
     img = img.unsqueeze(0)
     img = img.to(device=device, dtype=torch.float32)
 
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         if not args.no_save:
             # out_filename = out_files[0]
             result = mask_to_image(mask)
-            result.save(os.path.join(out_files[0],str(i)+'.jpg'))
+            result.save(os.path.join(out_files[0],filename+'.jpg'))
             logging.info(f'Mask saved to {str(i)}')
 
         if args.viz:

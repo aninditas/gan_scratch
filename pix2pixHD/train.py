@@ -120,7 +120,7 @@ if __name__ == '__main__':
             ### save latest model
             if total_steps % opt.save_latest_freq == save_delta:
                 print('saving the latest model (epoch %d, total_steps %d)' % (epoch, total_steps))
-                model.module.save('latest')
+                model.module.save('latest_fold_{}'.format(opt.fold))
                 np.savetxt(iter_path, (epoch, epoch_iter), delimiter=',', fmt='%d')
 
             if epoch_iter >= dataset_size:
@@ -137,8 +137,8 @@ if __name__ == '__main__':
         ### save model for this epoch
         if epoch % opt.save_epoch_freq == 0:
             print('saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))
-            model.module.save('latest')
-            model.module.save(epoch)
+            model.module.save('latest_fold_{}'.format(opt.fold))
+            # model.module.save(epoch)
             np.savetxt(iter_path, (epoch+1, 0), delimiter=',', fmt='%d')
 
         ### instead of only training the local enhancer, train the entire network after certain iterations

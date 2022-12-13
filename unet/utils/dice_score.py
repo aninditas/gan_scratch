@@ -1,26 +1,36 @@
 import torch
 from torch import Tensor
+import sklearn.metrics
+from torchmetrics import F1Score
 
 
 def dice_coeff(input: Tensor, target: Tensor, reduce_batch_first: bool = False, epsilon=1e-6):
     # Average of Dice coefficient for all batches, or for a single mask
     assert input.size() == target.size()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if input.dim() == 1 and reduce_batch_first:
         raise ValueError(f'Dice: asked to reduce batch but got tensor without batch dimension (shape {input.shape})')
 
-    if input.dim() == 1 or reduce_batch_first:
-        inter = torch.dot(input.reshape(-1), target.reshape(-1))
-        sets_sum = torch.sum(input) + torch.sum(target)
-        if sets_sum.item() == 0:
-            sets_sum = 2 * inter
+    # if input.dim() == 1 or reduce_batch_first:
+    #     dc = F1Score().to(device)
+    #     return dc(input, target)
+    #     # inter = torch.dot(input.reshape(-1), target.reshape(-1))
+    #     # sets_sum = torch.sum(input) + torch.sum(target)
+    #     # if sets_sum.item() == 0:
+    #     #     sets_sum = 2 * inter
+    #     #
+    #     # return (2 * inter + epsilon) / (sets_sum + epsilon)
+    # else:
 
-        return (2 * inter + epsilon) / (sets_sum + epsilon)
-    else:
-        # compute and average metric for each batch element
-        dice = 0
-        for i in range(input.shape[0]):
-            dice += dice_coeff(input[i, ...], target[i, ...])
-        return dice / input.shape[0]
+    # compute and average metric for each batch element
+    dc = F1Score().to(device)
+    # dice = 0
+    # for i in range(input.shape[0]):
+    #     # dice += dice_coeff(input[i, ...], target[i, ...])
+    #     # dice += sklearn.metrics.f1_score(input[i, ...], target[i, ...],average='binary',pos_label=1)
+    #     dice += dc(input[i, ...], target[i, ...])
+    # return dice / input.shape[0]
+    return dc(input.type(torch.int64), target.type(torch.int64))
 
 
 def multiclass_dice_coeff(input: Tensor, target: Tensor, reduce_batch_first: bool = False, epsilon=1e-6):

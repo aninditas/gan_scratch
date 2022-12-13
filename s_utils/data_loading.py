@@ -7,12 +7,17 @@ import numpy as np
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
+import cv2
+
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
-class BasicDataset(Dataset):
-    def __init__(self, images_dir: str, masks_dir: str, scale: float = 1.0, mask_suffix: str = '',new_w=None, new_h=None):
+class SegmentationDataset(Dataset):
+    def __init__(self, images_dir: str, masks_dir: str, scale: float = 1.0, mask_suffix: str = '',new_w=None, new_h=None, last_scratch_segments=None):
         self.images_dir = [Path(id) for id in images_dir]
         self.masks_dir = [Path(id) for id in masks_dir]
+        self.last_scratch_segments = last_scratch_segments
         assert 0 < scale <= 1, 'Scale must be between 0 and 1'
         self.scale = scale
         self.new_w = new_w
@@ -29,7 +34,7 @@ class BasicDataset(Dataset):
         return len(self.ids)
 
     @staticmethod
-    def preprocess(pil_img, scale, is_mask, new_w, new_h):
+    def preprocess(pil_img, scale, is_mask, new_w, new_h, last_scratch_segments=1):
         w, h = pil_img.size
         if new_w is not None and new_h is not None:
             newW = new_w
@@ -38,7 +43,15 @@ class BasicDataset(Dataset):
             newW, newH = int(scale * w), int(scale * h)
         assert newW > 0 and newH > 0, 'Scale is too small, resized images would have no pixel'
         pil_img = pil_img.resize((newW, newH), resample=Image.NEAREST if is_mask else Image.BICUBIC)
-        img_ndarray = np.asarray(pil_img)
+        if not is_mask:
+            pil_img = pil_img.convert('RGB')
+        img_ndarray = np.asarray(pil_img).squeeze()
+
+        if is_mask and np.max(img_ndarray)>last_scratch_segments:
+            img_ndarray =np.rint(img_ndarray/255).astype(np.int32)
+
+        if is_mask and img_ndarray.shape[-1]==3:
+            img_ndarray = img_ndarray[:,:,0]
 
         if not is_mask:
             if img_ndarray.ndim == 2:
@@ -59,6 +72,7 @@ class BasicDataset(Dataset):
             return Image.fromarray(torch.load(filename).numpy())
         else:
             return Image.open(filename)
+            # cv2.imread(str(filename))
 
     def __getitem__(self, idx):
         name = self.ids[idx]
@@ -77,11 +91,16 @@ class BasicDataset(Dataset):
         mask = self.load(mask_file[0])
         img = self.load(img_file[0])
 
-        assert img.size == mask.size, \
-            f'Image and mask {name} should be the same size, but are {img.size} and {mask.size}'
+        # if img.size != mask.size:
+        #     print('debug')
 
-        img = self.preprocess(img, self.scale, is_mask=False, new_w=self.new_w, new_h=self.new_h)
-        mask = self.preprocess(mask, self.scale, is_mask=True, new_w=self.new_w, new_h=self.new_h)
+        # assert img.size == mask.size, \
+        #     f'Image and mask {name} should be the same size, but are {img.size} and {mask.size}'
+
+        # if img_file[0].name[:3]=='exp': #debug
+        #     print('') #
+        img = self.preprocess(img, self.scale, is_mask=False, new_w=self.new_w, new_h=self.new_h, last_scratch_segments=self.last_scratch_segments)
+        mask = self.preprocess(mask, self.scale, is_mask=True, new_w=self.new_w, new_h=self.new_h, last_scratch_segments=self.last_scratch_segments)
 
         return {
             'image': torch.as_tensor(img.copy()).float().contiguous(),
@@ -99,31 +118,35 @@ class ClassifierDataset(Dataset):
         # self.files_scratch = listdir(scratch_path)
         temp = [listdir(id) for id in scratch_path]
         self.files_scratch = list(itertools.chain(*temp))
-        self.files_normal = listdir(normal_path) if normal_path!=None else []
+        try:
+            temp = [listdir(id) for id in normal_path]
+            self.files_normal = list(itertools.chain(*temp))
+        except: self.files_normal = []
+        # self.files_normal = listdir(normal_path) if normal_path!=None else []
         self.X_data = self.files_scratch+self.files_normal
         self.y_data = np.concatenate((np.repeat(1,len(self.files_scratch)),np.repeat(0,len(self.files_normal))))
         assert len(self.X_data)==len(self.y_data), f'image and label length is different'
 
     def __getitem__(self, index):
         lbl = self.y_data[index]
+        # if index>=1320 or index<64:
+        #     temp=0
         parent = self.scratch_path if index<len(self.files_scratch) else self.normal_path
         try:
-            img = BasicDataset.load(join(parent, self.X_data[index]))
+            img = SegmentationDataset.load(join(parent, self.X_data[index]))
         except:
             for pa in parent:
                 try:
-                    img = BasicDataset.load(join(pa,self.X_data[index]))
+                    img = SegmentationDataset.load(join(pa, self.X_data[index]))
                     break
-                except:
-                    pass
+                except: pass
 
-        img = BasicDataset.preprocess(img, self.scale, is_mask=False, new_w=self.new_w, new_h=self.new_h)
-        # lbl = BasicDataset.preprocess(lbl, self.scale, is_mask=True)
+        img = SegmentationDataset.preprocess(img, self.scale, is_mask=False, new_w=self.new_w, new_h=self.new_h)
         return {
             'image': torch.as_tensor(img.copy()).float().contiguous(),
-            'mask': torch.as_tensor(lbl.copy()).long().contiguous()
+            'mask': torch
+                .as_tensor(lbl.copy()).long().contiguous()
         }
-        # return img, lbl
 
     def __len__(self):
         return len(self.y_data)

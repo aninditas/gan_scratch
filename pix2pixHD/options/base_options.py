@@ -20,6 +20,7 @@ class BaseOptions():
         self.parser.add_argument('--verbose', action='store_true', default=False, help='toggles verbose')
         self.parser.add_argument('--fp16', action='store_true', default=False, help='train with AMP')
         self.parser.add_argument('--local_rank', type=int, default=0, help='local rank for distributed training')
+        self.parser.add_argument('--fold', type=int, default=0, help='data fold')
 
         # input/output sizes       
         self.parser.add_argument('--batchSize', type=int, default=4, help='input batch size')
@@ -36,7 +37,7 @@ class BaseOptions():
         self.parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data argumentation') 
         self.parser.add_argument('--nThreads', default=2, type=int, help='# threads for loading data')                
         self.parser.add_argument('--max_dataset_size', type=int, default=float("inf"), help='Maximum number of samples allowed per dataset. If the dataset directory contains more than max_dataset_size, only a subset is loaded.')
-        self.parser.add_argument('--data_split_length', type=str, default='data/6_output_file_datasplit/data_length.csv', help='length of each data for different phases')
+        self.parser.add_argument('--data_split_length', type=str, default='', help='length of each data for different phases')
 
         # for displays
         self.parser.add_argument('--display_winsize', type=int, default=512,  help='display window size')

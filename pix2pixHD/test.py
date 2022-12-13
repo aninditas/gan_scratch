@@ -61,7 +61,8 @@ if __name__ == '__main__':
 
         visuals = OrderedDict([
             # ('input_label', util.tensor2label(data['label'][0], opt.label_nc)),
-            ('synthesized_image', util.tensor2im(generated.data[0]))])
+            # ('synthesized_image', util.tensor2im(generated.data[0]))])
+            ('',util.tensor2im(generated.data[0]))])
         img_path = data['path']
         # print('process image... %s' % img_path) #TODO print testing 1/1
         visualizer.save_images(webpage, visuals, img_path)

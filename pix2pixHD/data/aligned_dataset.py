@@ -1,6 +1,6 @@
 import os.path
-from data.base_dataset import BaseDataset, get_params, get_transform, normalize
-from data.image_folder import make_dataset
+from pix2pixHD.data.base_dataset import BaseDataset, get_params, get_transform, normalize
+from pix2pixHD.data.image_folder import make_dataset
 from PIL import Image
 
 class AlignedDataset(BaseDataset):
@@ -35,7 +35,8 @@ class AlignedDataset(BaseDataset):
     def __getitem__(self, index):        
         ### input A (label maps)
         A_path = self.A_paths[index]              
-        A = Image.open(A_path)        
+        A = Image.open(A_path)
+        A = A.resize((320,240))
         params = get_params(self.opt, A.size)
         if self.opt.label_nc == 0:
             transform_A = get_transform(self.opt, params)
@@ -49,6 +50,7 @@ class AlignedDataset(BaseDataset):
         if self.opt.isTrain or self.opt.use_encoded_image:
             B_path = self.B_paths[index]   
             B = Image.open(B_path).convert('RGB')
+            B = B.resize((320, 240))
             transform_B = get_transform(self.opt, params)      
             B_tensor = transform_B(B)
 
@@ -62,8 +64,10 @@ class AlignedDataset(BaseDataset):
                 feat_path = self.feat_paths[index]            
                 feat = Image.open(feat_path).convert('RGB')
                 norm = normalize()
-                feat_tensor = norm(transform_A(feat))                            
-
+                feat_tensor = norm(transform_A(feat))
+        # import torchvision.transforms.functional as fn
+        # A_tensor = fn.resize(A_tensor,size=(240,320))
+        # B_tensor = fn.resize(B_tensor,size=(240,320))
         input_dict = {'label': A_tensor, 'inst': inst_tensor, 'image': B_tensor, 
                       'feat': feat_tensor, 'path': A_path}
 

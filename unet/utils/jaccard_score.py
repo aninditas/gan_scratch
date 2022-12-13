@@ -1,26 +1,34 @@
 import torch
 from torch import Tensor
+import sklearn.metrics
+from torchmetrics import JaccardIndex
 
 
 def jaccard_coeff(input: Tensor, target: Tensor, reduce_batch_first: bool = False, epsilon=1e-6):
     # Average of Jaccard coefficient for all batches, or for a single mask
     assert input.size() == target.size()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if input.dim() == 2 and reduce_batch_first:
         raise ValueError(f'Jaccard: asked to reduce batch but got tensor without batch dimension (shape {input.shape})')
 
-    if input.dim() == 2 or reduce_batch_first:
-        inter = torch.dot(input.reshape(-1), target.reshape(-1))
-        sets_sum = torch.sum(input) + torch.sum(target)
-        if sets_sum.item() == 0:
-            sets_sum = inter
+    # if input.dim() == 2 or reduce_batch_first:
+    #     assert input.reshape(-1).shape == target.reshape(-1).shape
+    #     inter = torch.dot(input.reshape(-1), target.reshape(-1))
+    #     sets_sum = torch.sum(input) + torch.sum(target)
+    #     if sets_sum.item() == 0:
+    #         # print()
+    #         sets_sum = inter
+    #     return (inter + epsilon) / (sets_sum + epsilon)
+    # else:
 
-        return (inter + epsilon) / (sets_sum + epsilon)
-    else:
-        # compute and average metric for each batch element
-        jaccard = 0
-        for i in range(input.shape[0]):
-            jaccard += jaccard_coeff(input[i, ...], target[i, ...])
-        return jaccard / input.shape[0]
+    # compute and average metric for each batch element
+    jaccard = 0
+    jc = JaccardIndex(num_classes=2, average='macro').to(device)
+    for i in range(input.shape[0]):
+        # jaccard += jaccard_coeff(input[i, ...], target[i, ...])
+        # jaccard += sklearn.metrics.jaccard_score(input[i, ...], target[i, ...], average='macro')
+        jaccard += jc(input[i, ...].type(torch.int64), target[i, ...].type(torch.int64))
+    return jaccard / input.shape[0]
 
 
 def multiclass_jaccard_coeff(input: Tensor, target: Tensor, reduce_batch_first: bool = False, epsilon=1e-6):
