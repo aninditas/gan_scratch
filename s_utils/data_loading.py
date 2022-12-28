@@ -91,14 +91,6 @@ class SegmentationDataset(Dataset):
         mask = self.load(mask_file[0])
         img = self.load(img_file[0])
 
-        # if img.size != mask.size:
-        #     print('debug')
-
-        # assert img.size == mask.size, \
-        #     f'Image and mask {name} should be the same size, but are {img.size} and {mask.size}'
-
-        # if img_file[0].name[:3]=='exp': #debug
-        #     print('') #
         img = self.preprocess(img, self.scale, is_mask=False, new_w=self.new_w, new_h=self.new_h, last_scratch_segments=self.last_scratch_segments)
         mask = self.preprocess(mask, self.scale, is_mask=True, new_w=self.new_w, new_h=self.new_h, last_scratch_segments=self.last_scratch_segments)
 
@@ -129,8 +121,6 @@ class ClassifierDataset(Dataset):
 
     def __getitem__(self, index):
         lbl = self.y_data[index]
-        # if index>=1320 or index<64:
-        #     temp=0
         parent = self.scratch_path if index<len(self.files_scratch) else self.normal_path
         try:
             img = SegmentationDataset.load(join(parent, self.X_data[index]))

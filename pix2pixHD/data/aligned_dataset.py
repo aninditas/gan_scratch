@@ -65,9 +65,6 @@ class AlignedDataset(BaseDataset):
                 feat = Image.open(feat_path).convert('RGB')
                 norm = normalize()
                 feat_tensor = norm(transform_A(feat))
-        # import torchvision.transforms.functional as fn
-        # A_tensor = fn.resize(A_tensor,size=(240,320))
-        # B_tensor = fn.resize(B_tensor,size=(240,320))
         input_dict = {'label': A_tensor, 'inst': inst_tensor, 'image': B_tensor, 
                       'feat': feat_tensor, 'path': A_path}
 

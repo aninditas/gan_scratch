@@ -3,7 +3,6 @@ from pix2pixHD.data.base_data_loader import BaseDataLoader
 
 
 def CreateDataset(opt):
-    dataset = None
     from pix2pixHD.data.aligned_dataset import AlignedDataset
     dataset = AlignedDataset()
 

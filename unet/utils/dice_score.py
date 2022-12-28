@@ -11,25 +11,9 @@ def dice_coeff(input: Tensor, target: Tensor, reduce_batch_first: bool = False, 
     if input.dim() == 1 and reduce_batch_first:
         raise ValueError(f'Dice: asked to reduce batch but got tensor without batch dimension (shape {input.shape})')
 
-    # if input.dim() == 1 or reduce_batch_first:
-    #     dc = F1Score().to(device)
-    #     return dc(input, target)
-    #     # inter = torch.dot(input.reshape(-1), target.reshape(-1))
-    #     # sets_sum = torch.sum(input) + torch.sum(target)
-    #     # if sets_sum.item() == 0:
-    #     #     sets_sum = 2 * inter
-    #     #
-    #     # return (2 * inter + epsilon) / (sets_sum + epsilon)
-    # else:
-
     # compute and average metric for each batch element
     dc = F1Score().to(device)
-    # dice = 0
-    # for i in range(input.shape[0]):
-    #     # dice += dice_coeff(input[i, ...], target[i, ...])
-    #     # dice += sklearn.metrics.f1_score(input[i, ...], target[i, ...],average='binary',pos_label=1)
-    #     dice += dc(input[i, ...], target[i, ...])
-    # return dice / input.shape[0]
+
     return dc(input.type(torch.int64), target.type(torch.int64))
 
 
@@ -47,4 +31,4 @@ def dice_loss(input: Tensor, target: Tensor, multiclass: bool = False):
     # Dice loss (objective to minimize) between 0 and 1
     assert input.size() == target.size()
     fn = multiclass_dice_coeff if multiclass else dice_coeff
-    return 1 - fn(input, target)#, reduce_batch_first=True)
+    return 1 - fn(input, target) #, reduce_batch_first=True)

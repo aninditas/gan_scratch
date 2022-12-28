@@ -11,16 +11,6 @@ def jaccard_coeff(input: Tensor, target: Tensor, reduce_batch_first: bool = Fals
     if input.dim() == 2 and reduce_batch_first:
         raise ValueError(f'Jaccard: asked to reduce batch but got tensor without batch dimension (shape {input.shape})')
 
-    # if input.dim() == 2 or reduce_batch_first:
-    #     assert input.reshape(-1).shape == target.reshape(-1).shape
-    #     inter = torch.dot(input.reshape(-1), target.reshape(-1))
-    #     sets_sum = torch.sum(input) + torch.sum(target)
-    #     if sets_sum.item() == 0:
-    #         # print()
-    #         sets_sum = inter
-    #     return (inter + epsilon) / (sets_sum + epsilon)
-    # else:
-
     # compute and average metric for each batch element
     jaccard = 0
     jc = JaccardIndex(num_classes=2, average='macro').to(device)

@@ -28,9 +28,6 @@ def load_image(info_dict_ns, image_size, dataset_name=None):
         info_dict_ns['npy'] = cv2.resize(np.array(np.load(os.path.join(info_dict_ns['path'], info_dict_ns['idx_file_random'])), dtype='uint8'), dsize=image_size,interpolation=cv2.INTER_NEAREST)
     else:
         info_dict_ns['npy'] = cv2.resize(np.rint(np.array(cv2.imread(os.path.join(info_dict_ns['path'], info_dict_ns['idx_file_random']))[:,:,0]/255)),dsize=image_size,interpolation=cv2.INTER_NEAREST)
-    # elif dataset_name == 'concrete':
-    #     info_dict_ns['npy'] = cv2.resize(np.rint(np.array(cv2.imread(os.path.join(info_dict_ns['path'], info_dict_ns['idx_file_random']))[:, :, 0]/255)), dsize=image_size, interpolation=cv2.INTER_NEAREST)
-
 
     info_dict_ns['lid'] = np.array(
             [1 if ii in info_dict_ns['idx_segment'] else 0 for i in info_dict_ns['npy'] for ii in i]).reshape(
@@ -237,63 +234,22 @@ def split_light_dark_dataset(dataset_names, dataset_information, input_before_da
 
 
 def combine_scratch(output_pix2pix_inference, image_size, output_scratch_combined, scratch_basic_units, f):
-    # gen_list = os.listdir(os.path.join(output_pix2pix_inference, "curve/test_latest/images/"))
     gen_list = os.listdir(os.path.join(output_pix2pix_inference, "{}/test_latest_fold_{}/images/".format(scratch_basic_units[0],f)))
-    # img={}
     for num in range(len(gen_list)):
-        # npy = np.load(os.path.join(output_scratch_segment_npy, gen_list[num][:-22] + ".npy"))
         result = np.zeros(shape=tuple(reversed(image_size)) + (3,))
         for idx, sb in enumerate(scratch_basic_units):
             if sb[-3:] == 'all': continue
             img = cv2.imread(os.path.join(output_pix2pix_inference, "{}/test_latest_fold_{}/images/".format(sb,f), gen_list[num]), cv2.IMREAD_COLOR)
             result = np.maximum(result,img).astype(np.uint8)
-            # loc = np.where(npy == scratch_new_segments[idx])
-            # result[loc][:] = img[loc][:]
-
-            # curve_img = cv2.imread(os.path.join(output_pix2pix_inference, "curve/test_latest/images/", gen_list[num]), cv2.IMREAD_COLOR)
-            # straight_img = cv2.imread(os.path.join(output_pix2pix_inference, "straight/test_latest/images/", gen_list[num]), cv2.IMREAD_COLOR)
-            # end_img = cv2.imread(os.path.join(output_pix2pix_inference, "end/test_latest/images/", gen_list[num]), cv2.IMREAD_COLOR)
-            # crack_img = cv2.imread(os.path.join(output_pix2pix_inference, "crack/test_latest/images/", gen_list[num]), cv2.IMREAD_COLOR)
-
-
-
-        # for i in range(image_size[1]):
-        #     for j in range(image_size[0]):
-        #         if dataset_name == 'lid': #TODO check dataset
-        #             if npy[i][j] == scratch_new_segments[0]:
-        #                 result[i][j] = straight_img[i][j]
-        #             elif npy[i][j] == scratch_new_segments[1]:
-        #                 result[i][j] = curve_img[i][j]
-        #             elif npy[i][j] == scratch_new_segments[2]:
-        #                 result[i][j] = end_img[i][j]
-        #         elif dataset_name in ['magTile','concrete']:
-        #             if npy[i][j] == scratch_new_segments[0]:
-        #                 result[i][j] = crack_img[i][j]
-        # result = result / 255
-        # cv2.imwrite(os.path.join(output_scratch_combined, str(gen_list[num][:-22]) + ".jpg"), result)
         cv2.imwrite(os.path.join(output_scratch_combined, str(gen_list[num])), result)
 
 
-def combine_LID(output_scratch_combined, output_scratch_segment_npy, output_normal_random_image, image_size, output_scratch_lid_combined,id_scratch):
+def combine_LID(output_scratch_combined, output_normal_random_image, output_scratch_lid_combined):
     name_list = os.listdir(output_scratch_combined)
 
     for name in name_list:
-        # npy = np.load(os.path.join(output_scratch_segment_npy, name[:-4] + ".npy"))
         lid = Image.fromarray(cv2.imread(os.path.join(output_normal_random_image, name), cv2.IMREAD_COLOR)).convert("RGBA")
         gen = Image.fromarray(cv2.imread(os.path.join(output_scratch_combined, name), cv2.IMREAD_COLOR)).convert("RGBA")
-
-        # FIN = lid.copy()
-
-        # avg_gen = np.average(np.average(ma.masked_array(gen, mask = 1-(np.repeat(np.clip(npy,0,1),3))), axis=0), axis=0)
-        # avg_lid = np.average(np.average(lid, axis=0), axis=0)
-        # for i in range(3):
-        #     gen[:, :, i] = np.clip(gen[:, :, i] + (avg_lid[i] - avg_gen[i]), 0, 255)
-
-        # for i in range(image_size[1]):
-        #     for j in range(image_size[0]):
-        #         if npy[i][j] in id_scratch and gen[i, j].all() != 0:
-        #             FIN[i][j] = gen[i][j]
-
         newData = []
         for item in gen.getdata():
             if item[0] < 30 and item[1] < 30 and item[2] < 30 and item[3] == 255:

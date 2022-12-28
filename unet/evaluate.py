@@ -8,7 +8,7 @@ from unet.utils.dice_score import multiclass_dice_coeff, dice_coeff
 from unet.utils.jaccard_score import jaccard_coeff, multiclass_jaccard_coeff
 import matplotlib.pyplot as plt
 
-def evaluate(net, dataloader, device, metrics, purpose,dataset_name=None, export_detail=False, export_path=None):
+def evaluate(net, dataloader, device, metrics, purpose, dataset_name=None, export_detail=False, export_path=None):
     net.eval()
     num_val_batches = len(dataloader)
     score={}
@@ -51,8 +51,15 @@ def evaluate(net, dataloader, device, metrics, purpose,dataset_name=None, export
                 elif purpose=='classification':
                     mask_pred = F.one_hot(mask_pred.argmax(dim=1),net.n_classes)
                     if export_detail:
-                        try: os.mkdir(export_path)
-                        except: pass
+                        export_path = export_path+'_'+net.arch
+                        try:
+                            os.mkdir(export_path)
+                        except:
+                            temp = os.listdir(export_path)
+                            for t in temp:
+                                try:
+                                    os.remove(os.path.join(export_path, t))
+                                except: pass
                         logging.info(mask_pred)
                         for i, mt, mp in zip(image, mask_true.argmax(dim=1), mask_pred.argmax(dim=1)):
                             temp = mt-mp
