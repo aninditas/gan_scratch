@@ -12,6 +12,7 @@ import pandas as pd
 import shutil
 import numpy.ma as ma
 from PIL import Image,ImageFilter
+from s_utils.utils import create_or_reset_dir
 
 def load_image(info_dict_ns, image_size, dataset_name=None):
     """Load, resize, and extract lid area of the image
@@ -144,6 +145,9 @@ def generate_scratch_segments(number_of_generated_images, input_normal_segment, 
                               flatten_bg_lid=False, bg=[], lid=[],dataset_name=None, export_before_after=True):
     info_dict_list = []
     count_img = 0
+    for d in [output_normal_random_image,output_scratch_before_after,output_scratch_segment_image,output_scratch_segment_npy]:
+        create_or_reset_dir(d)
+
     while count_img<number_of_generated_images:
         info_dict = {}
         info_dict['lid_normal'] = {}
@@ -235,6 +239,7 @@ def split_light_dark_dataset(dataset_names, dataset_information, input_before_da
 
 def combine_scratch(output_pix2pix_inference, image_size, output_scratch_combined, scratch_basic_units, f):
     gen_list = os.listdir(os.path.join(output_pix2pix_inference, "{}/test_latest_fold_{}/images/".format(scratch_basic_units[0],f)))
+    create_or_reset_dir(output_scratch_combined)
     for num in range(len(gen_list)):
         result = np.zeros(shape=tuple(reversed(image_size)) + (3,))
         for idx, sb in enumerate(scratch_basic_units):
@@ -246,7 +251,7 @@ def combine_scratch(output_pix2pix_inference, image_size, output_scratch_combine
 
 def combine_LID(output_scratch_combined, output_normal_random_image, output_scratch_lid_combined):
     name_list = os.listdir(output_scratch_combined)
-
+    create_or_reset_dir(output_scratch_lid_combined)
     for name in name_list:
         lid = Image.fromarray(cv2.imread(os.path.join(output_normal_random_image, name), cv2.IMREAD_COLOR)).convert("RGBA")
         gen = Image.fromarray(cv2.imread(os.path.join(output_scratch_combined, name), cv2.IMREAD_COLOR)).convert("RGBA")

@@ -5,25 +5,35 @@ import numpy as np
 import torch
 from s_models.cls_models import Cls_model
 from s_models.unet_model import UNet
-from s_utils.cut_basic_units import cut_basic_units
+
 from s_utils.data_loading import SegmentationDataset, ClassifierDataset
 from s_utils.eval import calculate_m_s
 from s_utils.frechet_distance import calculate_frechet_distance
 from s_utils.scratch_generator import split_light_dark_dataset, generate_scratch_segments, combine_scratch, combine_LID
 from s_utils.train import train_seg_cls
-from s_utils.utils import slice_dataset, slice_dataset_training, augment_image, calculate_diversity
+from s_utils.utils import slice_dataset, slice_dataset_training, augment_image, calculate_diversity, \
+    create_or_reset_dir, cut_basic_units
 from torch.utils.data import DataLoader
 from unet.evaluate import evaluate
 
+import torch, os
+import numpy as np
+from PIL import Image
+from s_models.cls_models import Cls_model
+from pytorch_cnn_visualizations.src.gradcam import GradCam
+from pytorch_cnn_visualizations.src.misc_functions import save_class_activation_images
+from torch.autograd import Variable
+
 
 class Experiment(object):
-    def __init__(self, image_size, number_of_generated_images, factor_shift, factor_rotate, dataset_name, base):
+    def __init__(self, image_size, number_of_generated_images, factor_shift, factor_rotate, dataset_name, base, pretrained=False):
         self.image_size = image_size
         self.number_of_generated_images = number_of_generated_images
         self.factor_shift = factor_shift
         self.factor_rotate = factor_rotate
         self.dataset_name = dataset_name
         self.base = base
+        self.pretrained=pretrained
         self.input_scratch_raw = 'data/{}_0_input_scratch'.format(dataset_name)
         self.input_normal_raw = 'data/{}_0_input_normal'.format(dataset_name)
         self.input_scratch = 'data/{}_1_input_scratch'.format(dataset_name)
@@ -110,7 +120,7 @@ class Experiment(object):
         split_light_dark_dataset(self.subdataset_numbers, self.dataset_information, self.input_before_datasplit,
                                  self.input_file_name_datasplit, self.output_light_dark_datasplit)
 
-    def export_index_split(self):
+    def export_index_split(self,dataset_name):
         print('STEP 1.2: EXPORT INDEX LIST AND DEFINE SPLIT NUMBER')
         if self.dataset_name in ['conc2', 'asphalt']:  # TODO check dataset
             self.input_normal = None
@@ -121,7 +131,7 @@ class Experiment(object):
                       input_scratch=self.input_scratch, output_scratch_sliced=self.output_scratch_sliced,
                       input_normal=self.input_normal, output_normal_sliced=self.output_normal_sliced,
                       dataset_names=self.subdataset_numbers, folds=self.folds, data_split=self.data_split,
-                      dataset_name=self.dataset_name)
+                      dataset_name=dataset_name)
 
     # 2 NEW SCRATCH GENERATION
     def generate_scratch(self, f, export_before_after=True):
@@ -154,7 +164,7 @@ class Experiment(object):
                                   export_before_after=export_before_after)
 
     # 3 CUT INTO BASIC UNIT FOR IMAGE INFERENCE
-    def cut_basic_units(self, f, create_defect=True):
+    def cut_basic_units_inf(self, f, create_defect=True):
         print('STEP 3: CUT INTO BASIC UNITS FOR IMAGE INFERENCE FOLD {}'.format(f))
         segs = self.scratch_new_segments if create_defect else self.scratch_segments
         cut_basic_units(scratch_segment_npy=self.output_scratch_segment_npy,
@@ -192,14 +202,17 @@ class Experiment(object):
         sbu = [self.scratch_basic_units[-1]] if last else self.scratch_basic_units[:-1]
         for sn in sbu:
             pname = pix2pix_name if pix2pix_name is not None else sn
-            try:
-                temp = os.listdir(
-                    os.path.join(self.output_pix2pix_inference, pname, 'test_latest_fold_' + str(f), 'images'))
-                for t in temp:
-                    os.remove(
-                        os.path.join(self.output_pix2pix_inference, pname, 'test_latest_fold_' + str(f), 'images', t))
-            except FileNotFoundError:
-                pass
+            create_or_reset_dir(os.path.join(self.output_pix2pix_inference, pname, 'test_latest_fold_' + str(f), 'images'))
+            # try:
+            #     temp = os.listdir(
+            #         os.path.join(self.output_pix2pix_inference, pname, 'test_latest_fold_' + str(f), 'images'))
+            #     for t in temp:
+            #         os.remove(
+            #             os.path.join(self.output_pix2pix_inference, pname, 'test_latest_fold_' + str(f), 'images', t))
+            # except FileNotFoundError:
+            #     pass
+
+
             os.system('cmd /c "python pix2pixHD/test.py --name {} '
                       '--dataroot data/3_output_scratch_basic_unit_for_inference/{} --how_many {} --fold {} '
                       '--which_epoch latest_fold_{} "'.format(
@@ -209,11 +222,12 @@ class Experiment(object):
                 os.mkdir(os.path.join(self.output_pix2pix_inference, final_name))
             except FileExistsError:
                 pass
-            try:
-                shutil.rmtree(
-                    os.path.join(self.output_pix2pix_inference, final_name, 'test_latest_fold_' + str(f), 'images'))
-            except FileNotFoundError:
-                pass
+            create_or_reset_dir(os.path.join(self.output_pix2pix_inference, final_name, 'test_latest_fold_' + str(f), 'images'))
+            # try:
+            #     shutil.rmtree(
+            #         os.path.join(self.output_pix2pix_inference, final_name, 'test_latest_fold_' + str(f), 'images'))
+            # except FileNotFoundError:
+            #     pass
             try:
                 shutil.rmtree(os.path.join(self.output_pix2pix_inference, final_name, 'test_latest_fold_' + str(f)))
             except FileNotFoundError:
@@ -293,7 +307,7 @@ class Experiment(object):
                           ori_numbers=ori_numbers, learning_rate=learning_rate,
                           last_scratch_segments=self.scratch_new_segments[-1],
                           output_unet_prediction=self.output_unet_prediction, visualize_unet=True,
-                          checkpoint=self.output_trained_unet)
+                          checkpoint=self.output_trained_unet, pretrained=self.pretrained)
         if ori:
             train_seg_cls(scale=0.5, epochs=epochs, batch_size=2, fold=f, purpose='segmentation',
                           image_scratch=[os.path.join(self.output_scratch_sliced, 'split_' + str(1) + '_fold_' + str(f),
@@ -304,7 +318,7 @@ class Experiment(object):
                           ori_numbers=ori_numbers, learning_rate=learning_rate,
                           last_scratch_segments=self.scratch_new_segments[-1],
                           output_unet_prediction=self.output_unet_prediction, visualize_unet=True,
-                          checkpoint=self.output_trained_unet)
+                          checkpoint=self.output_trained_unet, pretrained=self.pretrained)
         if std_aug:
             train_seg_cls(scale=0.5, epochs=epochs, batch_size=2, fold=f, purpose='segmentation',
                           image_scratch=[os.path.join(self.output_scratch_sliced, 'split_' + str(1) + '_fold_' + str(f),
@@ -317,7 +331,7 @@ class Experiment(object):
                           ori_numbers=ori_numbers, learning_rate=learning_rate,
                           last_scratch_segments=self.scratch_new_segments[-1],
                           output_unet_prediction=self.output_unet_prediction, visualize_unet=True,
-                          checkpoint=self.output_trained_unet)
+                          checkpoint=self.output_trained_unet, pretrained=self.pretrained)
         if pix2pix:
             train_seg_cls(scale=0.5, epochs=epochs, batch_size=2, fold=f, purpose='segmentation',
                           image_scratch=[
@@ -333,7 +347,7 @@ class Experiment(object):
                           ori_numbers=ori_numbers, learning_rate=learning_rate,
                           last_scratch_segments=self.scratch_new_segments[-1],
                           output_unet_prediction=self.output_unet_prediction, visualize_unet=True,
-                          checkpoint=self.output_trained_unet)
+                          checkpoint=self.output_trained_unet, pretrained=self.pretrained)
 
     # 15 RUN EVALUATION
     def eval_unet(self):
@@ -366,72 +380,72 @@ class Experiment(object):
         ori_numbers = int(np.sum(
             np.genfromtxt(os.path.join(self.output_light_dark_sliced, 'indices', 'data_length.csv'), delimiter=',')))
         learning_rate = 1e-4
+        batch_size=16
+        epoch=10
+        info = '_pre'+str(self.pretrained)
+        image_scratch = [os.path.join(self.output_scratch_sliced, 'split_' + str(2) + '_fold_' + str(f), 'JPEGImages')]
+        image_normal = [os.path.join(self.output_normal_sliced, 'split_' + str(1) + '_fold_' + str(f), 'JPEGImages')]
+
         if combiner_std:
-            output_img_vgg_ = os.path.join(self.output_img_vgg, 'fold_' + str(f), 'combiner_std')
-            train_seg_cls(scale=0.5, epochs=10, batch_size=16, fold=f, purpose='classification',
-                          image_scratch=[os.path.join(self.output_scratch_sliced, 'split_' + str(2) + '_fold_' + str(f),
-                                                      'JPEGImages'),
-                                         self.output_scratch_lid_combined],
-                          image_normal=[os.path.join(self.output_normal_sliced, 'split_' + str(1) + '_fold_' + str(f),
-                                                     'JPEGImages'),
-                                        os.path.join(self.output_std_aug_normal_images, 'JPEGImages')],
+            info_ = 'combiner_std' + info
+            image_scratch_ = image_scratch+[self.output_scratch_lid_combined]
+            image_normal_ = [os.path.join(self.output_std_aug_normal_images, 'JPEGImages')] + image_normal
+            output_img_vgg_ = os.path.join(self.output_img_vgg, 'fold_' + str(f), info_)
+            train_seg_cls(scale=0.5, epochs=1, batch_size=batch_size, fold=f, purpose='classification', #TODO change epoch
+                          image_scratch=image_scratch_, image_normal=image_normal_,
                           metrics='dice', new_w=320, new_h=240, checkpoint=self.output_trained_vgg,
                           dataset_name=self.dataset_name,
-                          ori_numbers=ori_numbers, learning_rate=learning_rate, export_path=output_img_vgg_, arch=arch)
+                          ori_numbers=ori_numbers, learning_rate=learning_rate, export_path=output_img_vgg_, arch=arch,
+                          pretrained=self.pretrained, info=info_)
 
         if combiner_pix:
-            output_img_vgg_ = os.path.join(self.output_img_vgg, 'fold_' + str(f), 'combiner_pix')
-            train_seg_cls(scale=0.5, epochs=10, batch_size=16, fold=f, purpose='classification',
-                          image_scratch=[os.path.join(self.output_scratch_sliced, 'split_' + str(2) + '_fold_' + str(f),
-                                                      'JPEGImages'),
-                                         self.output_scratch_lid_combined],
-                          image_normal=[os.path.join(self.output_normal_sliced, 'split_' + str(1) + '_fold_' + str(f),
-                                                     'JPEGImages'),
-                                        os.path.join(self.output_pix2pix_inference, 'full_normal_' + self.dataset_name,
-                                                     'test_latest_fold_' + str(f), 'images')],
+            info_ = 'combiner_pix' + info
+            image_scratch_ = image_scratch+[self.output_scratch_lid_combined]
+            image_normal_ = [os.path.join(self.output_pix2pix_inference, 'full_normal_' + self.dataset_name,
+                                                'test_latest_fold_' + str(f), 'images')] + image_normal
+            output_img_vgg_ = os.path.join(self.output_img_vgg, 'fold_' + str(f), info_)
+            train_seg_cls(scale=0.5, epochs=epoch, batch_size=batch_size, fold=f, purpose='classification',
+                          image_scratch=image_scratch_, image_normal=image_normal_,
                           metrics='dice', new_w=320, new_h=240, checkpoint=self.output_trained_vgg,
                           dataset_name=self.dataset_name,
-                          ori_numbers=ori_numbers, learning_rate=learning_rate, export_path=output_img_vgg_, arch=arch)
+                          ori_numbers=ori_numbers, learning_rate=learning_rate, export_path=output_img_vgg_, arch=arch,
+                          pretrained=self.pretrained, info=info_)
 
         if ori:
-            output_img_vgg_ = os.path.join(self.output_img_vgg, 'fold_' + str(f), 'ori')
-            train_seg_cls(scale=0.5, epochs=10, batch_size=16, fold=f, purpose='classification',
-                          image_scratch=[os.path.join(self.output_scratch_sliced, 'split_' + str(2) + '_fold_' + str(f),
-                                                      'JPEGImages')],
-                          image_normal=[os.path.join(self.output_normal_sliced, 'split_' + str(1) + '_fold_' + str(f),
-                                                     'JPEGImages')],
+            info_ = 'ori' + info
+            output_img_vgg_ = os.path.join(self.output_img_vgg, 'fold_' + str(f), info_)
+            train_seg_cls(scale=0.5, epochs=epoch, batch_size=batch_size, fold=f, purpose='classification',
+                          image_scratch=image_scratch, image_normal=image_normal,
                           metrics='dice', new_w=320, new_h=240, checkpoint=self.output_trained_vgg,
                           dataset_name=self.dataset_name,
-                          ori_numbers=ori_numbers, learning_rate=learning_rate, export_path=output_img_vgg_, arch=arch)
+                          ori_numbers=ori_numbers, learning_rate=learning_rate, export_path=output_img_vgg_, arch=arch,
+                          pretrained=self.pretrained, info=info_)
 
         if std_aug:
-            output_img_vgg_ = os.path.join(self.output_img_vgg, 'fold_' + str(f), 'stdAug')
-            train_seg_cls(scale=0.5, epochs=10, batch_size=16, fold=f, purpose='classification',
-                          image_scratch=[os.path.join(self.output_scratch_sliced, 'split_' + str(2) + '_fold_' + str(f),
-                                                      'JPEGImages'),
-                                         os.path.join(self.output_std_aug_defect_images, 'JPEGImages')],
-                          image_normal=[os.path.join(self.output_normal_sliced, 'split_' + str(1) + '_fold_' + str(f),
-                                                     'JPEGImages'),
-                                        os.path.join(self.output_std_aug_normal_images, 'JPEGImages')],
+            info_ = 'std_aug' + info
+            image_scratch_ = image_scratch+[os.path.join(self.output_std_aug_defect_images, 'JPEGImages')]
+            image_normal_ = [os.path.join(self.output_std_aug_normal_images, 'JPEGImages')] + image_normal
+            output_img_vgg_ = os.path.join(self.output_img_vgg, 'fold_' + str(f), info_)
+            train_seg_cls(scale=0.5, epochs=epoch, batch_size=batch_size, fold=f, purpose='classification',
+                          image_scratch=image_scratch_, image_normal=image_normal_,
                           metrics='dice', new_w=320, new_h=240, checkpoint=self.output_trained_vgg,
                           dataset_name=self.dataset_name,
-                          ori_numbers=ori_numbers, learning_rate=learning_rate, export_path=output_img_vgg_, arch=arch)
+                          ori_numbers=ori_numbers, learning_rate=learning_rate, export_path=output_img_vgg_, arch=arch,
+                          pretrained=self.pretrained, info=info_)
 
         if pix2pix:
-            output_img_vgg_ = os.path.join(self.output_img_vgg, 'fold_' + str(f), 'pix2pix')
-            train_seg_cls(scale=0.5, epochs=10, batch_size=16, fold=f, purpose='classification',
-                          image_scratch=[
-                              os.path.join(self.output_scratch_sliced, 'split_' + str(2) + '_fold_' + str(f),
-                                           'JPEGImages'),
-                              os.path.join(self.output_pix2pix_inference, 'full_defect_' + self.dataset_name,
-                                           'test_latest_fold_' + str(f), 'images'), ],
-                          image_normal=[os.path.join(self.output_normal_sliced, 'split_' + str(1) + '_fold_' + str(f),
-                                                     'JPEGImages'),
-                                        os.path.join(self.output_pix2pix_inference, 'full_normal_' + self.dataset_name,
-                                                     'test_latest_fold_' + str(f), 'images')],
+            info_ = 'pix2pix' + info
+            image_scratch_ = image_scratch+[os.path.join(self.output_pix2pix_inference, 'full_defect_' + self.dataset_name,
+                                              'test_latest_fold_' + str(f), 'images')]
+            image_normal_ = [os.path.join(self.output_pix2pix_inference, 'full_normal_' + self.dataset_name,
+                                                'test_latest_fold_' + str(f), 'images')] + image_normal
+            output_img_vgg_ = os.path.join(self.output_img_vgg, 'fold_' + str(f), info_)
+            train_seg_cls(scale=0.5, epochs=epoch, batch_size=batch_size, fold=f, purpose='classification',
+                          image_scratch=image_scratch_, image_normal=image_normal_,
                           metrics='dice', new_w=320, new_h=240, checkpoint=self.output_trained_vgg,
                           dataset_name=self.dataset_name,
-                          ori_numbers=ori_numbers, learning_rate=learning_rate, export_path=output_img_vgg_, arch=arch)
+                          ori_numbers=ori_numbers, learning_rate=learning_rate, export_path=output_img_vgg_, arch=arch,
+                          pretrained=self.pretrained, info=info_)
 
     # 18 TEST VGG
     def eval_vgg(self):
@@ -482,3 +496,31 @@ class Experiment(object):
                              'test_latest_fold_' + str(f), 'images')]
             msssmim_score = calculate_diversity(scratch_folders, new_w=320, new_h=240)
             print("fold {} dataset {} pix2pix msssim: {}".format(str(f), self.dataset_name, str(msssmim_score)))
+
+def export_heatmap(model_path, image_path, arch, target_layer):
+    # model_path = 'data/lid_16_output_checkpoint_vgg/checkpoint_combiner_std_preTrue_fold_0.pth'
+    # image_path = 'data/lid_17_output_vgg_prediction/fold_0/combiner_pix_mobilenet/3_FN.jpg'
+
+    model = Cls_model(output_dim=2, arch=arch)
+    model.load_state_dict(torch.load(model_path))
+
+    ground_truth = ['positive', 'negative']
+    for gt in ground_truth:
+        temp = os.path.join(image_path,os.path.split(model_path)[1][11:-11])
+        try:
+            os.mkdir(temp)
+        except FileExistsError:
+            pass
+        export_path = os.path.join(temp,str(gt))
+        create_or_reset_dir(export_path)
+        image_files = os.listdir(os.path.join(image_path,str(gt)))
+        for im in image_files:
+            img = Image.open(os.path.join(image_path,str(gt),im)).resize((320, 240), resample=Image.BICUBIC)
+            img = np.asarray(img).transpose((2, 0, 1))
+            img = torch.from_numpy(img/255).float()
+            img.unsqueeze_(0)
+            # Convert to Pytorch variable
+            img = Variable(img, requires_grad=True)
+            grad_cam = GradCam(model, target_layer, arch)
+            target_class, cam = grad_cam.generate_cam(img)
+            save_class_activation_images(img, target_class, cam, os.path.join(export_path,im[:-4]))

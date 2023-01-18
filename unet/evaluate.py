@@ -7,6 +7,7 @@ import logging
 from unet.utils.dice_score import multiclass_dice_coeff, dice_coeff
 from unet.utils.jaccard_score import jaccard_coeff, multiclass_jaccard_coeff
 import matplotlib.pyplot as plt
+from s_utils.utils import create_or_reset_dir
 
 def evaluate(net, dataloader, device, metrics, purpose, dataset_name=None, export_detail=False, export_path=None):
     net.eval()
@@ -15,6 +16,9 @@ def evaluate(net, dataloader, device, metrics, purpose, dataset_name=None, expor
     score['jaccard']=0
     score['dice']=0
     count = 0
+    if export_path is not None:
+        export_path = export_path + '_' + net.arch
+        create_or_reset_dir(export_path)
     # iterate over the validation set
     for batch in tqdm(dataloader, total=num_val_batches, desc='Validation round', unit='batch', leave=False, disable=True):
         image, mask_true = batch['image'], batch['mask']
@@ -36,7 +40,6 @@ def evaluate(net, dataloader, device, metrics, purpose, dataset_name=None, expor
         with torch.no_grad():
             # predict the mask
             mask_pred = net(image)
-
             # convert to one-hot format
             if net.n_classes == 1:
                 mask_pred = (F.sigmoid(mask_pred) > 0.5).float()
@@ -51,15 +54,14 @@ def evaluate(net, dataloader, device, metrics, purpose, dataset_name=None, expor
                 elif purpose=='classification':
                     mask_pred = F.one_hot(mask_pred.argmax(dim=1),net.n_classes)
                     if export_detail:
-                        export_path = export_path+'_'+net.arch
-                        try:
-                            os.mkdir(export_path)
-                        except:
-                            temp = os.listdir(export_path)
-                            for t in temp:
-                                try:
-                                    os.remove(os.path.join(export_path, t))
-                                except: pass
+                        # try:
+                        #     os.mkdir(export_path)
+                        # except:
+                        #     temp = os.listdir(export_path)
+                        #     for t in temp:
+                        #         try:
+                        #             os.remove(os.path.join(export_path, t))
+                        #         except: pass
                         logging.info(mask_pred)
                         for i, mt, mp in zip(image, mask_true.argmax(dim=1), mask_pred.argmax(dim=1)):
                             temp = mt-mp

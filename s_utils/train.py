@@ -14,7 +14,8 @@ from s_models.cls_models import Cls_model
 
 def train_seg_cls(scale, epochs, batch_size, fold, purpose, image_scratch, label_scratch=None, image_normal=None, metrics=None,
                   new_w=320, new_h=240, checkpoint=None, dataset_name='lid', ori_numbers=None, learning_rate=None, export_path=None,
-                  last_scratch_segments=None, output_unet_prediction=None, visualize_unet=False, arch='vgg',load=False, amp=False, classes=2):
+                  last_scratch_segments=None, output_unet_prediction=None, visualize_unet=False, arch='vgg',load=False, amp=False,
+                  classes=2, pretrained=False, info=None):
     logging.basicConfig(filename='log_'+dataset_name+'_'+purpose, level=logging.INFO, format='%(levelname)s: %(message)s')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     logging.info(f'Using device {device}')
@@ -22,20 +23,25 @@ def train_seg_cls(scale, epochs, batch_size, fold, purpose, image_scratch, label
     if purpose=='segmentation':
         net = UNet(n_channels=3, n_classes=classes, bilinear=False)
     elif purpose=='classification':
-        net=Cls_model(classes,arch=arch)
+        net=Cls_model(classes,arch=arch, pretrained=pretrained)
 
     if load:
         net.load_state_dict(torch.load(load, map_location=device))
         logging.info(f'Model loaded from {load}')
 
+    val_size=0.2
+    test_size=0.2
     net.to(device=device)
     try:
         train_loader, val_loader, test_loader = create_data_loader(purpose, image_scratch, image_normal, label_scratch,
                                                                    scale, new_w, new_h, last_scratch_segments,
-                                                                   ori_numbers, batch_size)
+                                                                   ori_numbers, batch_size,val_size=val_size,test_size=test_size)
         logging.info(f'''Starting training:
                 Image scratch:   {image_scratch}
                 Image normal:    {image_normal}
+                ori_numbers:     {ori_numbers}
+                val_size:        {val_size}
+                test_size:       {test_size}
                 Label:           {label_scratch}
                 Checkpoints:     {checkpoint}
                 Epochs:          {epochs}
@@ -106,17 +112,20 @@ def train_seg_cls(scale, epochs, batch_size, fold, purpose, image_scratch, label
                     division_step = (len(train_loader) * batch_size // (5 * batch_size))
                     if division_step > 0:
                         if global_step % division_step == 0:
-                            val_score = evaluate(net, val_loader, device, metrics, purpose=purpose,
+                            train_score = evaluate(net, train_loader, device, metrics, purpose=purpose,
                                                  dataset_name=dataset_name)
+                            logging.info('Training {} score: {}'.format(metrics, train_score))
+
+                            val_score = evaluate(net, val_loader, device, metrics, purpose=purpose,dataset_name=dataset_name)
                             scheduler.step(val_score)
-                            logging.info('Validation {} score: {}'.format(metrics, val_score))
+                            logging.info('Validation {} score: {}\n'.format(metrics, val_score))
 
             Path(checkpoint).mkdir(parents=True, exist_ok=True)
-            torch.save(net.state_dict(), os.path.join(checkpoint, 'checkpoint_fold.pth'))
+            torch.save(net.state_dict(), os.path.join(checkpoint, 'checkpoint_{}_{}_fold_{}.pth'.format(arch,info,str(fold))))
             logging.info(f'Checkpoint {epoch} saved!')
 
         test_score = evaluate(net, test_loader, device, metrics, purpose=purpose, dataset_name=dataset_name,
-                              export_detail=False, export_path=export_path)
+                              export_detail=True, export_path=export_path)
         logging.info('Testing {} score: {}'.format(metrics, test_score))
 
         if visualize_unet:
